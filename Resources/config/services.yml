@@ -1,0 +1,94 @@
+services:
+
+    auto1.api.previous_request:
+        class: Symfony\Component\HttpFoundation\Request
+        factory: ['@request_stack', 'getCurrentRequest']
+
+    auto1.api.response.transformer:
+        class: Auto1\ServiceAPIClientBundle\Service\Response\ResponseTransformer
+        arguments:
+            - '@auto1.api.endpoint.registry'
+            - '@auto1.api.response.serializer'
+        calls:
+            - [setLogger, ['@logger']]
+
+    auto1.api.request.visitor.content_type.file:
+        class: Auto1\ServiceAPIClientBundle\Service\Request\Visitor\FileContentTypeRequestVisitor
+
+    auto1.api.request.visitor.header_propagation:
+        class: Auto1\ServiceAPIClientBundle\Service\Request\Visitor\HeaderPropagationRequestVisitor
+        arguments:
+            - '@auto1.api.previous_request'
+            - '%auto1_service_api_client.propagate_headers%'
+
+    auto1.api.request.visitor.content_type.url:
+        class: Auto1\ServiceAPIClientBundle\Service\Request\Visitor\ImmutableHeaderValueRequestVisitor
+        arguments:
+            - 'Content-Type'
+            - 'application/x-www-form-urlencoded'
+
+    auto1.api.request.visitor.content_type.json:
+        class: Auto1\ServiceAPIClientBundle\Service\Request\Visitor\ImmutableHeaderValueRequestVisitor
+        arguments:
+            - 'Content-Type'
+            - 'application/json'
+
+    auto1.api.request.visitor.content_type.json_patch:
+        class: Auto1\ServiceAPIClientBundle\Service\Request\Visitor\ImmutableHeaderValueRequestVisitor
+        arguments:
+            - 'Content-Type'
+            - 'application/json-patch+json'
+
+    auto1.api.request.visitor.accept.url:
+        class: Auto1\ServiceAPIClientBundle\Service\Request\Visitor\ImmutableHeaderValueRequestVisitor
+        arguments:
+            - 'Accept'
+            - '*/*'
+
+    auto1.api.request.visitor.accept.json:
+        class: Auto1\ServiceAPIClientBundle\Service\Request\Visitor\ImmutableHeaderValueRequestVisitor
+        arguments:
+            - 'Accept'
+            - 'application/json'
+
+    auto1.api.request.visitor.accept.json_patch:
+        class: Auto1\ServiceAPIClientBundle\Service\Request\Visitor\ImmutableHeaderValueRequestVisitor
+        arguments:
+            - 'Accept'
+            - 'application/json-patch+json'
+
+    auto1.api.request.visitor.registry:
+        class: Auto1\ServiceAPIClientBundle\Service\Request\RequestVisitorRegistry
+
+    auto1.api.request.factory:
+        class: Auto1\ServiceAPIClientBundle\Service\Request\RequestFactory
+        arguments:
+            - '@auto1.api.endpoint.registry'
+            - '@auto1.api.request.serializer'
+            - '@auto1.api.request.visitor.registry'
+            - '@auto1.api.uri_factory'
+            - '@auto1.api.message_factory'
+        calls:
+            - [setLogger, ['@logger']]
+
+    auto1.api.client.service:
+        class: Auto1\ServiceAPIClientBundle\Service\APIClient
+        arguments:
+            - '@auto1.api.request.factory'
+            - '@auto1.api.response.transformer'
+            - '@auto1.api.http_client'
+        calls:
+            - [setLogger, ['@logger']]
+
+    # discovery
+    auto1.api.http_client:
+        class: Http\Client\HttpClient
+        factory: Http\Discovery\HttpClientDiscovery::find
+
+    auto1.api.uri_factory:
+        class: Http\Message\UriFactory
+        factory: Http\Discovery\UriFactoryDiscovery::find
+
+    auto1.api.message_factory:
+        class: Http\Message\MessageFactory
+        factory: Http\Discovery\MessageFactoryDiscovery::find
