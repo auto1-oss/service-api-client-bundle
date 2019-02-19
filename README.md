@@ -3,24 +3,6 @@ Bundle uses *php-http/httplug* client abstraction.
 So you'll need to install some psr7-compatible client into your project to be used by this bundle.
 For more details: [php-http/httplug clients and adapters](http://docs.php-http.org/en/latest/clients.html).
 
-## Composer
-You will need to add this to your composer.json:
-```json
-    "repositories": [
-        {
-            "type": "git",
-            "url": "git@github.com:auto1-oss/service-api-request.git"
-        },
-        {
-            "type": "git",
-            "url": "git@github.com:auto1-oss/service-api-components-bundle.git"
-        },
-        {
-            "type": "git",
-            "url": "git@github.com:auto1-oss/service-api-client-bundle.git"
-        }
-    ]
-```
 
 ## config.yml
 ```json
