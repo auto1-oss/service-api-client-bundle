@@ -68,10 +68,8 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
-                ->children()
-                    ->arrayNode('propagate_headers')
-                        ->defaultValue([])->arrayPrototype()->end()
-                    ->end()
+                ->arrayNode('propagate_headers')
+                    ->defaultValue([])->arrayPrototype()->end()
                 ->end()
             ->end()
         ;
