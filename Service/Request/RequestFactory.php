@@ -95,16 +95,6 @@ class RequestFactory implements RequestFactoryInterface
 
         $httpRequest = $this->visitRequest($httpRequest, $endpoint->getRequestFormat());
 
-        $this->getLogger()->debug(
-            'API HTTP request',
-            [
-                'URI' => (string)$httpRequest->getUri(),
-                'Method' => $httpRequest->getMethod(),
-                'RequestBody' => (string)$httpRequest->getBody(),
-                'RequestHeaders' => $httpRequest->getHeaders(),
-            ]
-        );
-
         return $httpRequest;
     }
 
