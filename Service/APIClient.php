@@ -32,20 +32,28 @@ class APIClient implements APIClientInterface
     private $client;
 
     /**
+     * @var string
+     */
+    private $requestTimeLogLevel;
+
+    /**
      * APIClient constructor.
      *
      * @param RequestFactoryInterface      $requestFactory
      * @param ResponseTransformerInterface $responseTransformer
      * @param HttpClient                   $client
+     * @param string                       $requestTimeLogLevel
      */
     public function __construct(
         RequestFactoryInterface $requestFactory,
         ResponseTransformerInterface $responseTransformer,
-        HttpClient $client
+        HttpClient $client,
+        string $requestTimeLogLevel = 'DEBUG'
     ) {
         $this->requestFactory = $requestFactory;
         $this->responseTransformer = $responseTransformer;
         $this->client = $client;
+        $this->requestTimeLogLevel = $requestTimeLogLevel;
     }
 
     /**
@@ -57,7 +65,8 @@ class APIClient implements APIClientInterface
 
         $startTime = \microtime(true);
         $response = $this->client->sendRequest($request);
-        $this->getLogger()->info(
+        $this->getLogger()->log(
+            $this->requestTimeLogLevel,
             'HttpClient request time (ms)',
             [
                 'requestPath' => $request->getUri()->getPath(),
