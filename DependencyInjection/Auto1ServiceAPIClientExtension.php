@@ -4,7 +4,6 @@ namespace Auto1\ServiceAPIClientBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
 
@@ -26,6 +25,7 @@ class Auto1ServiceAPIClientExtension extends Extension
 
         $container->setParameter('auto1_service_api_client.request_visitors', $config['request_visitors']);
         $container->setParameter('auto1_service_api_client.propagate_headers', $config['propagate_headers']);
+        $container->setParameter('auto1_service_api_client.request_time_log_level', $config['request_time_log_level']);
 
         /*
          * Headers to propagate are by default taken from @request_stack if exists
