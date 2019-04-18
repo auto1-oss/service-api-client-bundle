@@ -71,7 +71,6 @@ class APIClient implements APIClientInterface
             [
                 'requestPath' => $request->getUri()->getPath(),
                 'requestTime' => \round(\microtime(true) - $startTime, 3) * 1000,
-                'requestHeaders' => $request->getHeaders(),
             ]
         );
 
