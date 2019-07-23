@@ -3,7 +3,6 @@
 namespace Auto1\ServiceAPIClientBundle\Service;
 
 use Auto1\ServiceAPIRequest\ServiceRequestInterface;
-use Exception;
 use Http\Promise\Promise;
 
 /**
@@ -16,7 +15,7 @@ interface APIAsyncClientInterface
      *
      * @return Promise
      *
-     * @throws Exception
+     * @throws \Throwable
      */
     public function sendAsync(ServiceRequestInterface $request);
 }
