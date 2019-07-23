@@ -81,10 +81,24 @@ services:
         calls:
             - [setLogger, ['@logger']]
 
+    auto1.api.async_client.service:
+        class: Auto1\ServiceAPIClientBundle\Service\APIAsyncClient
+        arguments:
+            - '@auto1.api.request.factory'
+            - '@auto1.api.response.transformer'
+            - '@auto1.api.http_async_client'
+            - '%auto1_service_api_client.request_time_log_level%'
+        calls:
+            - [setLogger, ['@logger']]
+
     # discovery
     auto1.api.http_client:
         class: Http\Client\HttpClient
         factory: Http\Discovery\HttpClientDiscovery::find
+
+    auto1.api.http_async_client:
+        class: Http\Client\HttpAsyncClient
+        factory: Http\Discovery\HttpAsyncClientDiscovery::find
 
     auto1.api.uri_factory:
         class: Http\Message\UriFactory
