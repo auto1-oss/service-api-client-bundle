@@ -14,8 +14,6 @@ interface APIAsyncClientInterface
      * @param ServiceRequestInterface $request
      *
      * @return Promise
-     *
-     * @throws \Throwable
      */
     public function sendAsync(ServiceRequestInterface $request);
 }
