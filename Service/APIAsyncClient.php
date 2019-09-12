@@ -34,20 +34,28 @@ class APIAsyncClient implements APIAsyncClientInterface
     private $client;
 
     /**
+     * @var string
+     */
+    private $requestTimeLogLevel;
+
+    /**
      * APIAsyncClient constructor.
      *
      * @param RequestFactoryInterface      $requestFactory
      * @param ResponseTransformerInterface $responseTransformer
      * @param HttpAsyncClient              $client
+     * @param string                       $requestTimeLogLevel
      */
     public function __construct(
         RequestFactoryInterface $requestFactory,
         ResponseTransformerInterface $responseTransformer,
-        HttpAsyncClient $client
+        HttpAsyncClient $client,
+        string $requestTimeLogLevel = 'DEBUG'
     ) {
         $this->requestFactory = $requestFactory;
         $this->responseTransformer = $responseTransformer;
         $this->client = $client;
+        $this->requestTimeLogLevel = $requestTimeLogLevel;
     }
 
     /**
@@ -60,7 +68,8 @@ class APIAsyncClient implements APIAsyncClientInterface
 
         return $this->client->sendAsyncRequest($request)->then(
             function (ResponseInterface $response) use ($serviceRequest, $request, $startTime) {
-                $this->getLogger()->info(
+                $this->getLogger()->log(
+                    $this->requestTimeLogLevel,
                     'HttpClient request time (ms)',
                     [
                         'requestPath' => $request->getUri()->getPath(),
