@@ -10,6 +10,7 @@ use Http\Client\Exception\HttpException;
 use Http\Client\HttpAsyncClient;
 use Http\Promise\RejectedPromise;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LogLevel;
 
 /**
  * Class APIAsyncClient.
@@ -50,7 +51,7 @@ class APIAsyncClient implements APIAsyncClientInterface
         RequestFactoryInterface $requestFactory,
         ResponseTransformerInterface $responseTransformer,
         HttpAsyncClient $client,
-        string $requestTimeLogLevel = 'DEBUG'
+        string $requestTimeLogLevel = LogLevel::DEBUG
     ) {
         $this->requestFactory = $requestFactory;
         $this->responseTransformer = $responseTransformer;

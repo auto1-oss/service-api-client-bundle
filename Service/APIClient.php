@@ -8,6 +8,7 @@ use Http\Client\HttpClient;
 use Auto1\ServiceAPIClientBundle\Service\Request\RequestFactoryInterface;
 use Auto1\ServiceAPIClientBundle\Service\Response\ResponseTransformerInterface;
 use Auto1\ServiceAPIRequest\ServiceRequestInterface;
+use Psr\Log\LogLevel;
 
 /**
  * Class APIClient.
@@ -48,7 +49,7 @@ class APIClient implements APIClientInterface
         RequestFactoryInterface $requestFactory,
         ResponseTransformerInterface $responseTransformer,
         HttpClient $client,
-        string $requestTimeLogLevel = 'DEBUG'
+        string $requestTimeLogLevel = LogLevel::DEBUG
     ) {
         $this->requestFactory = $requestFactory;
         $this->responseTransformer = $responseTransformer;
