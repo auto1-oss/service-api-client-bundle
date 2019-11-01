@@ -2,6 +2,7 @@
 
 namespace Auto1\ServiceAPIClientBundle\DependencyInjection;
 
+use Psr\Log\LogLevel;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -23,7 +24,7 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
-                ->scalarNode('request_time_log_level')->defaultValue('DEBUG')->end()
+                ->scalarNode('request_time_log_level')->defaultValue(LogLevel::DEBUG)->end()
             ->end()
             ->children()
                 ->arrayNode('request_visitors')
