@@ -1,5 +1,5 @@
 {
-    "name": "auto1-oss/service-api-client-bundle",
+    "name": "mprzypadlo/service-api-client-bundle",
     "license": "MIT",
     "type": "auto1-bundle",
     "description": "Auto1 Service API Client for PHP projects",
