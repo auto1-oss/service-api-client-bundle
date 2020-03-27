@@ -13,14 +13,24 @@ class Configuration implements ConfigurationInterface
 {
     const KEY_SERVICE = 'service';
     const KEY_FORMAT = 'format';
+    const ROOT_NODE_NAME = 'auto1_service_api_client';
 
     /**
      * {@inheritdoc}
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder('auto1_service_api_client');
-        $rootNode = $treeBuilder->getRootNode();
+        $treeBuilder = null;
+        $rootNode = null;
+
+        //Support for < 4.2
+        if (method_exists(TreeBuilder::class, 'root')) {
+            $treeBuilder = new TreeBuilder();
+            $rootNode = $treeBuilder->root(self::ROOT_NODE_NAME);
+        } else {
+            $treeBuilder = new TreeBuilder(self::ROOT_NODE_NAME);
+            $rootNode = $treeBuilder->getRootNode();
+        }
 
         $rootNode
             ->children()
