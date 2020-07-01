@@ -135,7 +135,7 @@ class RequestFactory implements RequestFactoryInterface
                 throw new InvalidArgumentException($message, $errorCode);
             }
             $value = $serviceRequest->$getterMethod();
-            $path = str_replace($placeholder, $value, $path);
+            $path = str_replace($placeholder, urlencode($value), $path);
         }
 
         if (!$this->validateEndpointPath($path)) {
