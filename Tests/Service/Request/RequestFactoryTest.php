@@ -163,9 +163,107 @@ class RequestFactoryTest extends TestCase
     /**
      * @return void
      */
+    public function testBuildFlowWithQueryParams()
+    {
+        $baseUrl = 'baseUrl';
+        $routeString = '/routeString?param={param}';
+        $originParamValue = 'value with whitespaces';
+        $encodedParamValue = 'value+with+whitespaces';
+        $requestMethod = 'GET';
+        $requestBody = '{requestBody:requestBody}';
+        $endpointProphecy = $this->prophesize(EndpointInterface::class);
+        $endpointProphecy->__call('getBaseUrl', [])
+            ->willReturn($baseUrl)
+            ->shouldBeCalled()
+        ;
+        $endpointProphecy->__call('getPath', [])
+            ->willReturn($routeString)
+            ->shouldBeCalled()
+        ;
+        $endpointProphecy->__call('getMethod', [])
+            ->willReturn($requestMethod)
+            ->shouldBeCalled()
+        ;
+        $endpointProphecy->__call('getRequestFormat', [])
+            ->willReturn(EndpointInterface::FORMAT_JSON)
+            ->shouldBeCalled()
+        ;
+        $endpoint = $endpointProphecy->reveal();
+
+        $uri = $this->prophesize(UriInterface::class)->reveal();
+        $request = $this->prophesize(RequestInterface::class)->reveal();
+
+        $this->endpointRegistryProphecy
+            ->__call('getEndpoint', [Argument::type(ServiceRequestInterface::class)])
+            ->willReturn($endpoint)
+            ->shouldBeCalled()
+        ;
+
+        $this->serializerProphecy
+            ->__call('serialize', [Argument::type(ServiceRequestInterface::class), EndpointInterface::FORMAT_JSON])
+            ->willReturn($requestBody)
+            ->shouldBeCalled()
+        ;
+
+        $converterRoute = str_replace('{param}', $encodedParamValue, $routeString);
+        $this->uriFactoryProphecy
+            ->__call('createUri', [$baseUrl.$converterRoute])
+            ->willReturn($uri)
+            ->shouldBeCalled()
+        ;
+
+        $this->messageFactoryProphecy
+            ->__call('createRequest', [
+                $requestMethod,
+                $uri,
+                [],
+                $requestBody,
+            ])
+            ->willReturn($request)
+            ->shouldBeCalled()
+        ;
+
+        $this->requestVisitorRegistryProphecy->getRegisteredRequestVisitors(EndpointInterface::FORMAT_JSON)
+            ->willReturn([])
+            ->shouldBeCalled()
+        ;
+
+        $this->requestDecoratorProphecy
+            ->__call('visit', [Argument::type(RequestInterface::class)])
+            ->shouldNotBeCalled()
+        ;
+
+        // Mock non existing method of ServiceRequest `getParam`
+        $serviceRequest = $this->getMockBuilder(ServiceRequestInterface::class)
+            ->setMethods(['getParam'])
+            ->getMock()
+        ;
+
+        $serviceRequest->expects($this->once())
+            ->method('getParam')
+            ->willReturn($originParamValue)
+        ;
+
+        $requestBuilder = new RequestFactory(
+            $this->endpointRegistryProphecy->reveal(),
+            $this->serializerProphecy->reveal(),
+            $this->requestVisitorRegistryProphecy->reveal(),
+            $this->uriFactoryProphecy->reveal(),
+            $this->messageFactoryProphecy->reveal()
+        );
+
+        self::assertInstanceOf(
+            RequestInterface::class,
+            $requestBuilder->create($serviceRequest)
+        );
+    }
+
+    /**
+     * @return void
+     */
     public function testBuildFlowValidationFailsOnUnmappedRequestArguments()
     {
-        static::setExpectedException(InvalidArgumentException::class);
+        $this->setExpectedException(InvalidArgumentException::class);
 
         $baseUrl = 'baseUrl';
         $routeString = 'routeString\{invalidArgument}';
