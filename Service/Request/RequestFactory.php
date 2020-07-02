@@ -123,11 +123,13 @@ class RequestFactory implements RequestFactoryInterface
         $endpoint = $this->endpointRegistry->getEndpoint($serviceRequest);
         $baseUrl = $endpoint->getBaseUrl();
         $path = $endpoint->getPath();
+        $queryParams = $this->parseQueryParams($path);
 
         //check for placeholders
         preg_match_all('/{(\w*)}/', $path, $matches);
         foreach ($matches[0] as $index => $placeholder) {
-            $getterMethod = 'get'.ucfirst($matches[1][$index]);
+            $key = $matches[1][$index];
+            $getterMethod = 'get'.ucfirst($key);
             if (!method_exists($serviceRequest, $getterMethod)) {
                 $message = 'Invalid request path argumentAlias';
                 $errorCode = Response::HTTP_BAD_REQUEST;
@@ -135,6 +137,7 @@ class RequestFactory implements RequestFactoryInterface
                 throw new InvalidArgumentException($message, $errorCode);
             }
             $value = $serviceRequest->$getterMethod();
+            $value = array_key_exists($key, $queryParams) ? urlencode($value) : $value;
             $path = str_replace($placeholder, $value, $path);
         }
 
@@ -161,5 +164,22 @@ class RequestFactory implements RequestFactoryInterface
         $pathContainsEmptyFolders = preg_match('/\/\//', $path);
 
         return !$pathContainsUnmappedArguments && !$pathContainsEmptyFolders;
+    }
+
+    /**
+     * @param string $path
+     *
+     * @return array
+     */
+    private function parseQueryParams(string $path): array
+    {
+        $queryParamsString = parse_url($path, PHP_URL_QUERY);
+        if (null !== $queryParamsString) {
+            parse_str($queryParamsString, $queryParamsArray);
+
+            return $queryParamsArray;
+        }
+
+        return [];
     }
 }
