@@ -168,9 +168,11 @@ class RequestFactoryTest extends TestCase
         $baseUrl = 'baseUrl';
         $routeString = '/routeString?param={param}';
         $originParamValue = 'value with whitespaces';
-        $encodedParamValue = 'value+with+whitespaces';
         $requestMethod = 'GET';
         $requestBody = '{requestBody:requestBody}';
+
+        $expectedUri = 'baseUrl/routeString?param=value+with+whitespaces';
+
         $endpointProphecy = $this->prophesize(EndpointInterface::class);
         $endpointProphecy->__call('getBaseUrl', [])
             ->willReturn($baseUrl)
@@ -205,9 +207,8 @@ class RequestFactoryTest extends TestCase
             ->shouldBeCalled()
         ;
 
-        $converterRoute = str_replace('{param}', $encodedParamValue, $routeString);
         $this->uriFactoryProphecy
-            ->__call('createUri', [$baseUrl.$converterRoute])
+            ->__call('createUri', [$expectedUri])
             ->willReturn($uri)
             ->shouldBeCalled()
         ;

@@ -174,7 +174,7 @@ class RequestFactory implements RequestFactoryInterface
     private function parseQueryParams(string $path): array
     {
         $queryParamsString = parse_url($path, PHP_URL_QUERY);
-        if (isset($queryParamsString)) {
+        if (null !== $queryParamsString) {
             parse_str($queryParamsString, $queryParamsArray);
 
             return $queryParamsArray;
