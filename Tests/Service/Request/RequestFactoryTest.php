@@ -166,12 +166,12 @@ class RequestFactoryTest extends TestCase
     public function testBuildFlowWithQueryParams()
     {
         $baseUrl = 'baseUrl';
-        $routeString = '/routeString?query-param={queryParam}';
+        $routeString = '/routeString?first-param={firstParam}&second-param=ignored value';
         $originParamValue = 'value with whitespaces';
         $requestMethod = 'GET';
         $requestBody = '';
 
-        $expectedUri = 'baseUrl/routeString?query-param=value+with+whitespaces';
+        $expectedUri = 'baseUrl/routeString?first-param=value+with+whitespaces&second-param=ignored value';
 
         $endpointProphecy = $this->prophesize(EndpointInterface::class);
         $endpointProphecy->__call('getBaseUrl', [])
@@ -236,12 +236,12 @@ class RequestFactoryTest extends TestCase
 
         // Mock non existing method of ServiceRequest `getParam`
         $serviceRequest = $this->getMockBuilder(ServiceRequestInterface::class)
-            ->setMethods(['getQueryParam'])
+            ->setMethods(['getFirstParam'])
             ->getMock()
         ;
 
         $serviceRequest->expects($this->once())
-            ->method('getQueryParam')
+            ->method('getFirstParam')
             ->willReturn($originParamValue)
         ;
 

@@ -167,9 +167,9 @@ class RequestFactory implements RequestFactoryInterface
     }
 
     /**
-     * The query parameters aren't encoded for all GET requests.
-     * For example, "/v1/car-types/built-dates?country=CH&main-type=Qashqai+2&sort=&manufacturer=225" - here 
-     * "Qashqai+2" have to be "Qashqai%2B2".
+     * Convert URI string to array with query parameters (filtered out with predefined values and in reverse order)
+     * Input: '/route-string?first-param={firstParam}&second-param=secondValue'
+     * Output: ['firstParam' => 'first-param']
      *
      * @param string $path
      *
@@ -179,19 +179,35 @@ class RequestFactory implements RequestFactoryInterface
     {
         $queryParamsArray = [];
         $queryParamsString = parse_url($path, PHP_URL_QUERY);
+
         if (null !== $queryParamsString) {
-            // $queryParamsArray: ['query-param' => '{queryParam}']
             parse_str($queryParamsString, $queryParamsArray);
+            $queryParamsArray = array_filter($queryParamsArray, [$this, 'filterQueryParamConstant']);
+            $queryParamsArray = array_map([$this, 'trimCurlyBrackets'], $queryParamsArray);
 
-            // $queryParamsArray: ['query-param' => 'queryParam']
-            $queryParamsArray = array_map(function($queryValue) {
-                return trim($queryValue, '{}');
-            }, $queryParamsArray);
-
-            // $queryParamsArray: ['queryParam' => 'query-param']
             return array_flip($queryParamsArray);
         }
 
         return $queryParamsArray;
+    }
+
+    /**
+     * @param $queryValue
+     *
+     * @return bool
+     */
+    private function filterQueryParamConstant($queryValue)
+    {
+        return $queryValue !== $this->trimCurlyBrackets($queryValue);
+    }
+
+    /**
+     * @param string $str
+     *
+     * @return string
+     */
+    private function trimCurlyBrackets($str)
+    {
+        return trim($str, '{}');
     }
 }
