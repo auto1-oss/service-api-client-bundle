@@ -167,19 +167,47 @@ class RequestFactory implements RequestFactoryInterface
     }
 
     /**
+     * Convert URI string to array with query parameters (filtered out with predefined values and in reverse order)
+     * Input: '/route-string?first-param={firstParam}&second-param=secondValue'
+     * Output: ['firstParam' => 'first-param']
+     *
      * @param string $path
      *
      * @return array
      */
     private function parseQueryParams(string $path): array
     {
+        $queryParamsArray = [];
         $queryParamsString = parse_url($path, PHP_URL_QUERY);
+
         if (null !== $queryParamsString) {
             parse_str($queryParamsString, $queryParamsArray);
+            $queryParamsArray = array_filter($queryParamsArray, [$this, 'filterQueryParamConstant']);
+            $queryParamsArray = array_map([$this, 'trimCurlyBrackets'], $queryParamsArray);
 
-            return $queryParamsArray;
+            return array_flip($queryParamsArray);
         }
 
-        return [];
+        return $queryParamsArray;
+    }
+
+    /**
+     * @param $queryValue
+     *
+     * @return bool
+     */
+    private function filterQueryParamConstant($queryValue)
+    {
+        return $queryValue !== $this->trimCurlyBrackets($queryValue);
+    }
+
+    /**
+     * @param string $str
+     *
+     * @return string
+     */
+    private function trimCurlyBrackets($str)
+    {
+        return trim($str, '{}');
     }
 }
