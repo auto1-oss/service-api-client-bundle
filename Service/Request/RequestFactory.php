@@ -173,13 +173,21 @@ class RequestFactory implements RequestFactoryInterface
      */
     private function parseQueryParams(string $path): array
     {
+        $queryParamsArray = [];
         $queryParamsString = parse_url($path, PHP_URL_QUERY);
         if (null !== $queryParamsString) {
+            // $queryParamsArray: ['query-param' => '{queryParam}']
             parse_str($queryParamsString, $queryParamsArray);
 
-            return $queryParamsArray;
+            // $queryParamsArray: ['query-param' => 'queryParam']
+            $queryParamsArray = array_map(function($queryValue) {
+                return trim($queryValue, '{}');
+            }, $queryParamsArray);
+
+            // $queryParamsArray: ['queryParam' => 'query-param']
+            return array_flip($queryParamsArray);
         }
 
-        return [];
+        return $queryParamsArray;
     }
 }
