@@ -169,7 +169,7 @@ class RequestFactoryTest extends TestCase
         $routeString = '/routeString?query-param={queryParam}';
         $originParamValue = 'value with whitespaces';
         $requestMethod = 'GET';
-        $requestBody = '{requestBody:requestBody}';
+        $requestBody = '';
 
         $expectedUri = 'baseUrl/routeString?query-param=value+with+whitespaces';
 

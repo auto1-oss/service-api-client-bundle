@@ -167,6 +167,10 @@ class RequestFactory implements RequestFactoryInterface
     }
 
     /**
+     * The query parameters aren't encoded for all GET requests.
+     * For example, "/v1/car-types/built-dates?country=CH&main-type=Qashqai+2&sort=&manufacturer=225" - here 
+     * "Qashqai+2" have to be "Qashqai%2B2".
+     *
      * @param string $path
      *
      * @return array
