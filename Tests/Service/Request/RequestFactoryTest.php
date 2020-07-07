@@ -264,7 +264,7 @@ class RequestFactoryTest extends TestCase
      */
     public function testBuildFlowValidationFailsOnUnmappedRequestArguments()
     {
-        $this->setExpectedException(InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
 
         $baseUrl = 'baseUrl';
         $routeString = 'routeString\{invalidArgument}';
