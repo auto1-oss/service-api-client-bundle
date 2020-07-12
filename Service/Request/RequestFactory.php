@@ -118,7 +118,7 @@ class RequestFactory implements RequestFactoryInterface
      *
      * @return UriInterface
      */
-    private function getRequestUri(ServiceRequestInterface $serviceRequest)
+    private function getRequestUri(ServiceRequestInterface $serviceRequest): UriInterface
     {
         $endpoint = $this->endpointRegistry->getEndpoint($serviceRequest);
         $baseUrl = $endpoint->getBaseUrl();
@@ -148,9 +148,7 @@ class RequestFactory implements RequestFactoryInterface
             throw new MalformedRequestException($message, $errorCode);
         }
 
-        $uri = $this->uriFactory->createUri($baseUrl.$path);
-
-        return $uri;
+        return $this->uriFactory->createUri($baseUrl.$path);
     }
 
     /**

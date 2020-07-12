@@ -46,20 +46,25 @@ class HeaderPropagationRequestVisitorTest extends TestCase
             'additionalHeader1',
             'additionalHeader2',
         ];
-        $this->headerBagProphecy->__call('has', [Argument::type('string')])
-            ->shouldBeCalledTimes(\count($headerNamesArray))
+        $timesShouldBeCalled = \count($headerNamesArray);
+
+        $this->headerBagProphecy
+            ->__call('has', [Argument::type('string')])
+            ->shouldBeCalledTimes($timesShouldBeCalled)
             ->willReturn($this->requestProphecy)
         ;
-        $this->headerBagProphecy->__call('get', [Argument::type('string')])
-            ->shouldBeCalledTimes(\count($headerNamesArray))
+        $this->headerBagProphecy
+            ->__call('get', [Argument::type('string')])
+            ->shouldBeCalledTimes($timesShouldBeCalled)
             ->willReturn('someHeaderValue')
         ;
         /** @var HeaderBag $headerBag */
         $headerBag = $this->headerBagProphecy->reveal();
         $this->previousRequest->headers = $headerBag;
 
-        $this->requestProphecy->__call('withHeader', [Argument::type('string'), Argument::type('string')])
-            ->shouldBeCalledTimes(\count($headerNamesArray))
+        $this->requestProphecy
+            ->__call('withHeader', [Argument::type('string'), Argument::type('string')])
+            ->shouldBeCalledTimes($timesShouldBeCalled)
             ->willReturn($this->requestProphecy)
         ;
         /** @var Request $request */
@@ -69,6 +74,7 @@ class HeaderPropagationRequestVisitorTest extends TestCase
             $this->previousRequest,
             $headerNamesArray
         );
+
         $headerPropagationRequestVisitor->visit($request);
     }
 }
