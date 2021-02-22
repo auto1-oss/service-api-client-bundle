@@ -49,10 +49,12 @@ class APIAsyncClientTest extends TestCase
     public function testSendAsync()
     {
         $uriProphecy = $this->prophesize(UriInterface::class);
-        $uriProphecy->__call('getPath', [])->willReturn('somePath');
+        $uriProphecy->getPath()->willReturn('somePath');
+
         $requestProphecy = $this->prophesize(RequestInterface::class);
-        $requestProphecy->__call('getUri', [])->willReturn($uriProphecy->reveal());
-        $requestProphecy->__call('getHeaders', [])->willReturn(['someHeader']);
+        $requestProphecy->getUri()->willReturn($uriProphecy->reveal());
+        $requestProphecy->getHeaders()->willReturn(['someHeader']);
+
         $request = $requestProphecy->reveal();
         $response = $this->prophesize(ResponseInterface::class)->reveal();
         $object = new \stdClass();
@@ -61,19 +63,19 @@ class APIAsyncClientTest extends TestCase
         $serviceRequest = $this->prophesize(ServiceRequestInterface::class)->reveal();
 
         $this->requestFactoryProphecy
-            ->__call('create', [$serviceRequest])
+            ->create($serviceRequest)
             ->willReturn($request)
             ->shouldBeCalled()
         ;
 
         $promise = new FulfilledPromise($response);
         $this->clientProphecy
-            ->__call('sendAsyncRequest', [$request])
+            ->sendAsyncRequest($request)
             ->willReturn($promise)
             ->shouldBeCalled()
         ;
         $this->responseTransformerProphecy
-            ->__call('transform', [$response, $serviceRequest])
+            ->transform($response, $serviceRequest)
             ->willReturn($object)
             ->shouldBeCalled()
         ;
