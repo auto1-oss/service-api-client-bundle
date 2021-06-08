@@ -114,7 +114,7 @@ class ResponseTransformerTest extends TestCase
      */
     public function testTransformFails()
     {
-        static::setExpectedException(ResponseException::class);
+        $this->expectException(ResponseException::class);
 
         $responseBodyContent = '{$responseBodyContent:$responseBodyContent}';
         $failedStatusCode = Response::HTTP_INTERNAL_SERVER_ERROR;
