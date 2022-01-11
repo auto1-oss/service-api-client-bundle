@@ -19,7 +19,7 @@ class EndpointConfigurationTest extends TestCase
     {
         $cut = new EndpointConfiguration('POST', $path);
 
-        $this->assertEquals($regex, $cut->getPathRegexp());
+        self::assertEquals($regex, $cut->getPathRegexp());
     }
 
     public function provider()
