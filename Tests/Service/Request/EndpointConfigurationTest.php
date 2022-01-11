@@ -25,9 +25,13 @@ class EndpointConfigurationTest extends TestCase
     public function provider()
     {
         return [
-            'vehicle_by_id' => [
+            'endpoint_by_id' => [
                 '/v1/some/{id}',
                 '|/v1/some/\w+|'
+            ],
+            'optional_field' => [
+                '/v1/some/{id}?type={type}',
+                '|/v1/some/\w+\?type=\w+|'
             ]
         ];
     }

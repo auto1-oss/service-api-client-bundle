@@ -53,6 +53,7 @@ class EndpointConfiguration
     public function getPathRegexp(): string
     {
         $regex = preg_replace('/{(\w*)}/', '\w+', $this->getPath());
+        $regex = str_replace('?', '\\?', $regex);
 
         return "|{$regex}|";
     }
