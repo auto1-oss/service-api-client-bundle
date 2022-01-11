@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Auto1\ServiceAPIClientBundle\Service\Request\Visitor;
