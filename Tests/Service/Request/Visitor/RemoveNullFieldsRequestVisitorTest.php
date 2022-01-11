@@ -62,7 +62,7 @@ class RemoveNullFieldsRequestVisitorTest extends TestCase
             ->willReturn($this->uriInterfaceProfecy);
 
         $this->uriInterfaceProfecy->__call('getPath', [])
-            ->willReturn("/v2/vehicles/43");
+            ->willReturn("/v1/some/1");
 
         $this->streamInterfaceProfecy->__call('getContents', [])
             ->willReturn($input);
@@ -79,7 +79,7 @@ class RemoveNullFieldsRequestVisitorTest extends TestCase
         $removeNullFieldsRequestVisitor = new RemoveNullFieldsRequestVisitor(
             $factory,
             [
-                new EndpointConfiguration("PUT", "/v2/vehicles/{id}")
+                new EndpointConfiguration("PUT", "/v1/some/{id}")
             ]
         );
 
@@ -119,14 +119,14 @@ class RemoveNullFieldsRequestVisitorTest extends TestCase
             ->willReturn($this->uriInterfaceProfecy);
 
         $this->uriInterfaceProfecy->__call('getPath', [])
-            ->willReturn("/v2/vehicles/43");
+            ->willReturn("/v1/some/1");
 
         $request = $this->requestProphecy->reveal();
         $factory = $this->streamFactoryProfecy->reveal();
         $removeNullFieldsRequestVisitor = new RemoveNullFieldsRequestVisitor(
             $factory,
             [
-                new EndpointConfiguration("PUT", "/v2/vehicles/{id}")
+                new EndpointConfiguration("PUT", "/v1/some/{id}")
             ]
         );
 

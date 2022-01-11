@@ -25,8 +25,8 @@ class EndpointConfigurationTest extends TestCase
     {
         return [
             'vehicle_by_id' => [
-                '/v2/vehicles/{id}',
-                '|/v2/vehicles/\w+|'
+                '/v1/some/{id}',
+                '|/v1/some/\w+|'
             ]
         ];
     }
