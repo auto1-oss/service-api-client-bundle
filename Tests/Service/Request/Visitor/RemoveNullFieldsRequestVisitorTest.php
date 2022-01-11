@@ -93,12 +93,13 @@ class RemoveNullFieldsRequestVisitorTest extends TestCase
             'remove first level null' => [
                 json_encode(["a" => 1, "b" => null]),
                 json_encode(["a" => 1])
-            ], 'remove sub level null' => [
-                json_encode(["a" => 1, "b" => [ "c" => 2, "d" => null]]),
-                json_encode(["a" => 1, "b" => [ "c" => 2 ]])
+            ],
+            'remove sub level null' => [
+                json_encode(["a" => 1, "b" => ["c" => 2, "d" => null]]),
+                json_encode(["a" => 1, "b" => ["c" => 2]])
             ],
             'leaves key empty when all childs are null' => [
-                json_encode(["a" => 1, "b" => [ "c" => null, "d" => null]]),
+                json_encode(["a" => 1, "b" => ["c" => null, "d" => null]]),
                 json_encode(["a" => 1, "b" => []])
             ],
             'associative array' => [

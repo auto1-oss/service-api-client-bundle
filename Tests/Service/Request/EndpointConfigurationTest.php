@@ -17,7 +17,7 @@ class EndpointConfigurationTest extends TestCase
      */
     public function testRegexGeneration($path, $regex)
     {
-        $cut = new EndpointConfiguration("POST", $path);
+        $cut = new EndpointConfiguration('POST', $path);
 
         $this->assertEquals($regex, $cut->getPathRegexp());
     }
