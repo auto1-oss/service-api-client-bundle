@@ -137,6 +137,9 @@ class RequestFactory implements RequestFactoryInterface
                 throw new InvalidArgumentException($message, $errorCode);
             }
             $value = $serviceRequest->$getterMethod();
+            if (is_array($value)) {
+                $value = implode(',', $value);
+            }
             $value = array_key_exists($key, $queryParams) ? urlencode((string)$value) : $value;
             $path = str_replace($placeholder, $value, $path);
         }
