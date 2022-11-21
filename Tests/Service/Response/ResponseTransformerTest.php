@@ -54,7 +54,7 @@ class ResponseTransformerTest extends TestCase
         $dateFormat = 'Y-m-d';
 
         $responseBodyProphecy = $this->prophesize(StreamInterface::class);
-        $responseBodyProphecy->__call('getContents', [])
+        $responseBodyProphecy->getContents()
             ->willReturn($responseBodyContent)
             ->shouldBeCalled()
         ;
@@ -62,11 +62,11 @@ class ResponseTransformerTest extends TestCase
         $responseBody = $responseBodyProphecy->reveal();
 
         $responseProphecy = $this->prophesize(ResponseInterface::class);
-        $responseProphecy->__call('getBody', [])
+        $responseProphecy->getBody()
             ->willReturn($responseBody)
             ->shouldBeCalled()
         ;
-        $responseProphecy->__call('getStatusCode', [])
+        $responseProphecy->getStatusCode()
             ->willReturn($successStatusCode)
             ->shouldBeCalled()
         ;
@@ -87,13 +87,14 @@ class ResponseTransformerTest extends TestCase
             ->shouldBeCalled()
         ;
 
-        $this->endpointRegistryProphecy->__call('getEndpoint', [Argument::type(ServiceRequestInterface::class)])
+        /** @var ServiceRequestInterface $serviceRequest */
+        $serviceRequest = $this->prophesize(ServiceRequestInterface::class)->reveal();
+
+        $this->endpointRegistryProphecy
+            ->getEndpoint($serviceRequest)
             ->willReturn($endpointProphecy->reveal())
             ->shouldBeCalled()
         ;
-
-        /** @var ServiceRequestInterface $serviceRequest */
-        $serviceRequest = $this->prophesize(ServiceRequestInterface::class)->reveal();
 
         $this->serializerProphecy
             ->deserialize($responseBodyContent, $objectClass, $format, [DateTimeNormalizer::FORMAT_KEY => $dateFormat])
@@ -114,7 +115,7 @@ class ResponseTransformerTest extends TestCase
      */
     public function testTransformFails()
     {
-        static::setExpectedException(ResponseException::class);
+        $this->expectException(ResponseException::class);
 
         $responseBodyContent = '{$responseBodyContent:$responseBodyContent}';
         $failedStatusCode = Response::HTTP_INTERNAL_SERVER_ERROR;
@@ -161,7 +162,8 @@ class ResponseTransformerTest extends TestCase
         ;
         $endpoint = $endpointProphecy->reveal();
 
-        $this->endpointRegistryProphecy->getEndpoint(Argument::type(ServiceRequestInterface::class))
+        $this->endpointRegistryProphecy
+            ->getEndpoint(Argument::type(ServiceRequestInterface::class))
             ->willReturn($endpoint)
             ->shouldBeCalled()
         ;
@@ -169,7 +171,8 @@ class ResponseTransformerTest extends TestCase
         /** @var ServiceRequestInterface $serviceRequest */
         $serviceRequest = $this->prophesize(ServiceRequestInterface::class)->reveal();
 
-        $this->serializerProphecy->deserialize(Argument::any(), Argument::any(), Argument::any(), Argument::any())
+        $this->serializerProphecy
+            ->deserialize(Argument::any(), Argument::any(), Argument::any(), Argument::any())
             ->willThrow(new UnexpectedValueException());
 
         $responseTransformer = new ResponseTransformer(
