@@ -166,12 +166,13 @@ class RequestFactoryTest extends TestCase
     public function testBuildFlowWithQueryParams()
     {
         $baseUrl = 'baseUrl';
-        $routeString = '/routeString?first-param={firstParam}&second-param=ignored value';
+        $routeString = '/routeString?first-param={firstParam}&second-param=ignored value&arr-param[key]={arrParam}';
         $originParamValue = 'value with whitespaces';
+        $originArrParamValue = 'arrValue';
         $requestMethod = 'GET';
         $requestBody = '';
 
-        $expectedUri = 'baseUrl/routeString?first-param=value+with+whitespaces&second-param=ignored value';
+        $expectedUri = 'baseUrl/routeString?first-param=value+with+whitespaces&second-param=ignored value&arr-param[key]=arrValue';
 
         $endpointProphecy = $this->prophesize(EndpointInterface::class);
         $endpointProphecy->__call('getBaseUrl', [])
@@ -236,13 +237,18 @@ class RequestFactoryTest extends TestCase
 
         // Mock non existing method of ServiceRequest `getParam`
         $serviceRequest = $this->getMockBuilder(ServiceRequestInterface::class)
-            ->setMethods(['getFirstParam'])
+            ->setMethods(['getFirstParam', 'getArrParam'])
             ->getMock()
         ;
 
         $serviceRequest->expects($this->once())
             ->method('getFirstParam')
             ->willReturn($originParamValue)
+        ;
+
+        $serviceRequest->expects($this->once())
+            ->method('getArrParam')
+            ->willReturn($originArrParamValue)
         ;
 
         $requestBuilder = new RequestFactory(

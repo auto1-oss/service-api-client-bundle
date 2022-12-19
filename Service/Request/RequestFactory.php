@@ -182,6 +182,7 @@ class RequestFactory implements RequestFactoryInterface
 
         if (null !== $queryParamsString) {
             parse_str($queryParamsString, $queryParamsArray);
+            $queryParamsArray = $this->normalize_queryParams($queryParamsArray);
             $queryParamsArray = array_filter($queryParamsArray, [$this, 'filterQueryParamConstant']);
             $queryParamsArray = array_map([$this, 'trimCurlyBrackets'], $queryParamsArray);
 
@@ -209,5 +210,17 @@ class RequestFactory implements RequestFactoryInterface
     private function trimCurlyBrackets($str)
     {
         return trim($str, '{}');
+    }
+
+    /**
+     * @param array $queryParamsString
+     *
+     * @return array
+     */
+    private function normalize_queryParams($queryParamsArray)
+    {
+        $return = array();
+        array_walk_recursive($queryParamsArray, function($a) use (&$return) { $return[] = $a; });
+        return $return;
     }
 }
