@@ -221,6 +221,7 @@ class RequestFactory implements RequestFactoryInterface
     {
         $return = array();
         array_walk_recursive($queryParamsArray, function($a) use (&$return) { $return[] = $a; });
+
         return $return;
     }
 }
