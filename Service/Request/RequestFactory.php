@@ -217,9 +217,9 @@ class RequestFactory implements RequestFactoryInterface
      *
      * @return array
      */
-    private function normalizeQueryParams($queryParamsArray)
+    private function normalizeQueryParams(array $queryParamsArray): array
     {
-        $return = array();
+        $return = [];
         array_walk_recursive($queryParamsArray, function($a) use (&$return) { $return[] = $a; });
 
         return $return;
