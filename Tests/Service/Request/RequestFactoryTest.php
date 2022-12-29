@@ -166,14 +166,14 @@ class RequestFactoryTest extends TestCase
     public function testBuildFlowWithQueryParams()
     {
         $baseUrl = 'baseUrl';
-        $routeString = '/routeString?first-param={firstParam}&second-param=ignored value&arr-param[key]={arrParam}&dot.seprate[0].array={dotParam}';
+        $routeString = '/routeString?first-param={firstParam}&second-param=ignored value&arr-param[key]={arrParam}&dot.seprate[0].array={dotSeparatedArrayParam}';
         $originParamValue = 'value with whitespaces';
         $originArrParamValue = 'arrValue';
-        $originDotParamValue = 'dotValue';
+        $origindotSeparatedArrayParam = 'dotSeparatedArrayValue';
         $requestMethod = 'GET';
         $requestBody = '';
 
-        $expectedUri = 'baseUrl/routeString?first-param=value+with+whitespaces&second-param=ignored value&arr-param[key]=arrValue&dot.seprate[0].array=dotValue';
+        $expectedUri = 'baseUrl/routeString?first-param=value+with+whitespaces&second-param=ignored value&arr-param[key]=arrValue&dot.seprate[0].array=dotSeparatedArrayValue';
 
         $endpointProphecy = $this->prophesize(EndpointInterface::class);
         $endpointProphecy->__call('getBaseUrl', [])
@@ -238,7 +238,7 @@ class RequestFactoryTest extends TestCase
 
         // Mock non existing method of ServiceRequest `getParam`
         $serviceRequest = $this->getMockBuilder(ServiceRequestInterface::class)
-            ->setMethods(['getFirstParam', 'getArrParam', 'getDotParam'])
+            ->setMethods(['getFirstParam', 'getArrParam', 'getDotSeparatedArrayParam'])
             ->getMock()
         ;
 
@@ -253,8 +253,8 @@ class RequestFactoryTest extends TestCase
         ;
 
         $serviceRequest->expects($this->once())
-            ->method('getDotParam')
-            ->willReturn($originDotParamValue)
+            ->method('getDotSeparatedArrayParam')
+            ->willReturn($origindotSeparatedArrayParam)
         ;
 
         $requestBuilder = new RequestFactory(
