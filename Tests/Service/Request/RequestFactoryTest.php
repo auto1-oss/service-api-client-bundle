@@ -166,14 +166,14 @@ class RequestFactoryTest extends TestCase
     public function testBuildFlowWithQueryParams()
     {
         $baseUrl = 'baseUrl';
-        $routeString = '/routeString?first-param={firstParam}&second-param=ignored value&arr-param[key]={arrParam}&dot.seprate[0].array={dotSeparatedArrayParam}';
+        $routeString = '/routeString?first-param={firstParam}&second-param=ignored value&arr-param[key1]={arrParam1}&arr-param[key2]={arrParam2}';
         $originParamValue = 'value with whitespaces';
-        $originArrParamValue = 'arrValue';
-        $origindotSeparatedArrayParam = 'dotSeparatedArrayValue';
+        $originArrParam1Value = 'arrValue1';
+        $originArrParam2Value = 'arrValue2';
         $requestMethod = 'GET';
         $requestBody = '';
 
-        $expectedUri = 'baseUrl/routeString?first-param=value+with+whitespaces&second-param=ignored value&arr-param[key]=arrValue&dot.seprate[0].array=dotSeparatedArrayValue';
+        $expectedUri = 'baseUrl/routeString?first-param=value+with+whitespaces&second-param=ignored value&arr-param[key1]=arrValue1&arr-param[key2]=arrValue2';
 
         $endpointProphecy = $this->prophesize(EndpointInterface::class);
         $endpointProphecy->__call('getBaseUrl', [])
@@ -238,7 +238,7 @@ class RequestFactoryTest extends TestCase
 
         // Mock non existing method of ServiceRequest `getParam`
         $serviceRequest = $this->getMockBuilder(ServiceRequestInterface::class)
-            ->setMethods(['getFirstParam', 'getArrParam', 'getDotSeparatedArrayParam'])
+            ->setMethods(['getFirstParam', 'getArrParam1', 'getArrParam2'])
             ->getMock()
         ;
 
@@ -248,13 +248,13 @@ class RequestFactoryTest extends TestCase
         ;
 
         $serviceRequest->expects($this->once())
-            ->method('getArrParam')
-            ->willReturn($originArrParamValue)
+            ->method('getArrParam1')
+            ->willReturn($originArrParam1Value)
         ;
 
         $serviceRequest->expects($this->once())
-            ->method('getDotSeparatedArrayParam')
-            ->willReturn($origindotSeparatedArrayParam)
+            ->method('getArrParam2')
+            ->willReturn($originArrParam2Value)
         ;
 
         $requestBuilder = new RequestFactory(
