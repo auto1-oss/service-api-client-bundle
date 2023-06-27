@@ -33,7 +33,7 @@ class HeaderPropagationRequestVisitorTest extends TestCase
     /**
      * {@inheritdoc}
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->previousRequest = new Request();
         $this->requestProphecy = $this->prophesize(RequestInterface::class);
@@ -46,20 +46,25 @@ class HeaderPropagationRequestVisitorTest extends TestCase
             'additionalHeader1',
             'additionalHeader2',
         ];
-        $this->headerBagProphecy->__call('has', [Argument::type('string')])
-            ->shouldBeCalledTimes(\count($headerNamesArray))
-            ->willReturn($this->requestProphecy)
+        $timesShouldBeCalled = \count($headerNamesArray);
+
+        $this->headerBagProphecy
+            ->has(Argument::type('string'))
+            ->shouldBeCalledTimes($timesShouldBeCalled)
+            ->willReturn(true)
         ;
-        $this->headerBagProphecy->__call('get', [Argument::type('string')])
-            ->shouldBeCalledTimes(\count($headerNamesArray))
+        $this->headerBagProphecy
+            ->get(Argument::type('string'))
+            ->shouldBeCalledTimes($timesShouldBeCalled)
             ->willReturn('someHeaderValue')
         ;
         /** @var HeaderBag $headerBag */
         $headerBag = $this->headerBagProphecy->reveal();
         $this->previousRequest->headers = $headerBag;
 
-        $this->requestProphecy->__call('withHeader', [Argument::type('string'), Argument::type('string')])
-            ->shouldBeCalledTimes(\count($headerNamesArray))
+        $this->requestProphecy
+            ->withHeader(Argument::type('string'), Argument::type('string'))
+            ->shouldBeCalledTimes($timesShouldBeCalled)
             ->willReturn($this->requestProphecy)
         ;
         /** @var Request $request */

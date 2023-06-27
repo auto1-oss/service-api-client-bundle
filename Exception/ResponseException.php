@@ -11,7 +11,7 @@ use Auto1\ServiceAPIClientBundle\DTO\ErrorResponse;
 class ResponseException extends AbstractException
 {
     /**
-     * @var ErrorResponse
+     * @var ErrorResponse|null
      */
     protected $errorDto;
 
@@ -25,6 +25,12 @@ class ResponseException extends AbstractException
      */
     public function __construct(ErrorResponse $errorDto = null, $code = 0, $message = null, \Throwable $previous = null)
     {
-        parent::__construct($message ?: ($errorDto ? $errorDto->getMessage() : null), $code, $previous);
+        if ($message === null) {
+            $message = $errorDto
+                ? $errorDto->getMessage() ?? ''
+                : '';
+        }
+
+        parent::__construct($message, $code, $previous);
     }
 }
