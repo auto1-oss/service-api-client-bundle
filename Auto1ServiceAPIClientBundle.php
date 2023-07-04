@@ -2,6 +2,7 @@
 
 namespace Auto1\ServiceAPIClientBundle;
 
+use Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategy;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Auto1\ServiceAPIClientBundle\DependencyInjection\CompilerPass\RequestVisitorCompilerPass;
@@ -16,5 +17,8 @@ class Auto1ServiceAPIClientBundle extends Bundle
         parent::build($container);
 
         $container->addCompilerPass(new RequestVisitorCompilerPass());
+
+        $container->registerForAutoconfiguration(ResponseTransformerStrategy::class)
+            ->addTag('response.transformer.strategies');
     }
 }

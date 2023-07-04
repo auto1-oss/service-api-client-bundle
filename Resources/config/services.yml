@@ -16,14 +16,7 @@ services:
         class: Auto1\ServiceAPIClientBundle\Service\Response\ResponseStrategyTransformer
         arguments:
             $endpointRegistry: '@auto1.api.endpoint.registry'
-            $responseTransformerStrategies:
-                - '@Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategy\ExpectedResponseStrategy'
-                - '@Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategy\NotFoundResponseStrategy'
-                - '@Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategy\UnauthorizedResponseStrategy'
-                - '@Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategy\BadGatewayResponseStrategy'
-                - '@Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategy\GatewayTimeoutResponseStrategy'
-                - '@Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategy\ServiceUnavailableResponseStrategy'
-                - '@Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategy\UnexpectedResponseStrategy'
+            $responseTransformerStrategies: !tagged_iterator response.transformer.strategies
         calls:
             - [setLogger, ['@logger']]
 

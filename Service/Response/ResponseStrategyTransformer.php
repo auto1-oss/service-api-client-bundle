@@ -25,7 +25,7 @@ class ResponseStrategyTransformer implements LoggerAwareInterface, ResponseTrans
      */
     public function __construct(
         EndpointRegistryInterface $endpointRegistry,
-        array $responseTransformerStrategies
+        iterable $responseTransformerStrategies
     ) {
         $this->responseTransformerStrategies = $responseTransformerStrategies;
         $this->endpointRegistry = $endpointRegistry;
