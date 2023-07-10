@@ -8,7 +8,7 @@ use Auto1\ServiceAPIComponentsBundle\Exception\AbstractException;
 use Auto1\ServiceAPIComponentsBundle\Service\Endpoint\EndpointInterface;
 use Psr\Http\Message\ResponseInterface;
 
-interface ResponseTransformerStrategy
+interface ResponseTransformerStrategyInterface
 {
     public function supports(ResponseInterface $response): bool;
 

@@ -67,8 +67,8 @@ class ServiceUnavailableResponseStrategyTest extends TestCase
         $responseBody = 'some response';
         $errorMessage = 'service request failed due to 503 service unavailable';
 
-        $resposne = $this->createMock(ResponseInterface::class);
-        $resposne->method('getStatusCode')->willReturn(504);
+        $response = $this->createMock(ResponseInterface::class);
+        $response->method('getStatusCode')->willReturn(504);
 
         $endpoint = $this->createMock(EndpointInterface::class);
 
@@ -79,7 +79,7 @@ class ServiceUnavailableResponseStrategyTest extends TestCase
 
         $this->expectException(ServiceUnavailableResponseException::class);
 
-        $this->strategy->handle($endpoint, $resposne, $responseBody);
+        $this->strategy->handle($endpoint, $response, $responseBody);
     }
 
     private function createResponseWithStatus(int $statusCode): ResponseInterface

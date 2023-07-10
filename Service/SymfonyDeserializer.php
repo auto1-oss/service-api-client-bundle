@@ -14,7 +14,7 @@ use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 
-class SymfonyDeserializer implements LoggerAwareInterface, Deserializer
+class SymfonyDeserializer implements LoggerAwareInterface, DeserializerInterface
 {
     use LoggerAwareTrait;
 

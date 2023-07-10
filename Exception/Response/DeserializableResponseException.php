@@ -6,7 +6,7 @@ namespace Auto1\ServiceAPIClientBundle\Exception\Response;
 
 use Auto1\ServiceAPIClientBundle\DTO\ResponseTransformer\ErrorResponse;
 use Auto1\ServiceAPIClientBundle\Exception\ResponseException;
-use Auto1\ServiceAPIClientBundle\Service\Deserializer;
+use Auto1\ServiceAPIClientBundle\Service\DeserializerInterface;
 use Throwable;
 
 class DeserializableResponseException extends ResponseException
@@ -15,10 +15,10 @@ class DeserializableResponseException extends ResponseException
     private $errorResponse;
 
     public function __construct(
-        Deserializer $deserializer,
-        ErrorResponse $errorResponse,
-        string $message = '',
-        Throwable $previous = null
+        DeserializerInterface $deserializer,
+        ErrorResponse         $errorResponse,
+        string                $message = '',
+        Throwable             $previous = null
     ) {
         $this->errorResponse = $errorResponse;
         $this->deserializer = $deserializer;

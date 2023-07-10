@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Auto1\ServiceAPIClientBundle\Tests\Service;
 
 use Auto1\ServiceAPIClientBundle\Service\Response\ResponseStrategyTransformer;
-use Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategy;
+use Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategyInterface;
 use Auto1\ServiceAPIComponentsBundle\Exception\Core\ConfigurationException;
 use Auto1\ServiceAPIComponentsBundle\Service\Endpoint\EndpointInterface;
 use Auto1\ServiceAPIComponentsBundle\Service\Endpoint\EndpointRegistryInterface;
@@ -59,7 +59,7 @@ class ResponseStrategyTransformerTest extends TestCase
      * @dataProvider strategiesNotSupportingPassedRequest
      */
     public function testThrowsExceptionWhenNoStrategySupportsTheResponse(
-        ResponseTransformerStrategy ...$strategies
+        ResponseTransformerStrategyInterface ...$strategies
     ): void {
         $responseTransformer = new ResponseStrategyTransformer($this->endpointRegistry, $strategies);
 
@@ -127,8 +127,8 @@ class ResponseStrategyTransformerTest extends TestCase
         bool $shouldHandleBeCalled = false,
         bool $shouldSupportsBeCalled = true,
         $response = ''
-    ): ResponseTransformerStrategy {
-        $strategy = $this->createMock(ResponseTransformerStrategy::class);
+    ): ResponseTransformerStrategyInterface {
+        $strategy = $this->createMock(ResponseTransformerStrategyInterface::class);
         $strategy
             ->expects($shouldSupportsBeCalled ? self::once() : self::never())
             ->method('supports')

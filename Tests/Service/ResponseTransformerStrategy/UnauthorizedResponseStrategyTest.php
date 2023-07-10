@@ -7,7 +7,7 @@ namespace Auto1\ServiceAPIClientBundle\Tests\Service\ResponseTransformerStrategy
 use Auto1\ServiceAPIClientBundle\DTO\ErrorResponse;
 use Auto1\ServiceAPIClientBundle\Exception\Response\MalformedResponseException;
 use Auto1\ServiceAPIClientBundle\Exception\Response\NotAuthorizedException;
-use Auto1\ServiceAPIClientBundle\Service\Deserializer;
+use Auto1\ServiceAPIClientBundle\Service\DeserializerInterface;
 use Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategy\UnauthorizedResponseStrategy;
 use Auto1\ServiceAPIComponentsBundle\Service\Endpoint\EndpointInterface;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -18,7 +18,7 @@ use Psr\Log\LoggerInterface;
 class UnauthorizedResponseStrategyTest extends TestCase
 {
     /**
-     * @var Deserializer&MockObject
+     * @var DeserializerInterface&MockObject
      */
     private $deserializer;
 
@@ -34,7 +34,7 @@ class UnauthorizedResponseStrategyTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->deserializer = $this->createMock(Deserializer::class);
+        $this->deserializer = $this->createMock(DeserializerInterface::class);
         $this->logger = $this->createMock(LoggerInterface::class);
         $this->strategy = new UnauthorizedResponseStrategy($this->deserializer);
         $this->strategy->setLogger($this->logger);

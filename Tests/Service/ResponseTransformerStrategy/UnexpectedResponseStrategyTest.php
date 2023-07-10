@@ -6,7 +6,7 @@ namespace Auto1\ServiceAPIClientBundle\Tests\Service\ResponseTransformerStrategy
 
 use Auto1\ServiceAPIClientBundle\DTO\ResponseTransformer\ErrorResponse;
 use Auto1\ServiceAPIClientBundle\Exception\Response\DeserializableResponseException;
-use Auto1\ServiceAPIClientBundle\Service\Deserializer;
+use Auto1\ServiceAPIClientBundle\Service\DeserializerInterface;
 use Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategy\UnexpectedResponseStrategy;
 use Auto1\ServiceAPIComponentsBundle\Service\Endpoint\EndpointInterface;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -17,7 +17,7 @@ use Psr\Log\LoggerInterface;
 class UnexpectedResponseStrategyTest extends TestCase
 {
     /**
-     * @var Deserializer&MockObject
+     * @var DeserializerInterface&MockObject
      */
     private $deserializer;
 
@@ -33,7 +33,7 @@ class UnexpectedResponseStrategyTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->deserializer = $this->createMock(Deserializer::class);
+        $this->deserializer = $this->createMock(DeserializerInterface::class);
         $this->logger = $this->createMock(LoggerInterface::class);
         $this->strategy = new UnexpectedResponseStrategy($this->deserializer);
         $this->strategy->setLogger($this->logger);
@@ -60,92 +60,19 @@ class UnexpectedResponseStrategyTest extends TestCase
         ];
     }
 
-    public function testHandlesResponse(): void
+    /**
+     * @dataProvider statusProvider
+     */
+    public function testLogsError(int $statusCode, $errorMessage): void
     {
         $endpoint = $this->createMock(EndpointInterface::class);
-        $response = $this->createResponseWithStatus($statusCode = 666);
+        $response = $this->createResponseWithStatus($statusCode);
         $responseBody = 'bodyyy';
-        $errorMessage = 'Error response 666 cannot be deserialized';
 
         $this->logger
             ->expects(self::once())
             ->method('debug')
-            ->with($errorMessage);
-
-        $this->expectExceptionObject(new DeserializableResponseException(
-            $this->deserializer,
-            new ErrorResponse(
-                $endpoint,
-                $errorMessage,
-                $statusCode,
-                $responseBody
-            )
-        ));
-
-        $this->strategy->handle($endpoint, $response, $responseBody);
-    }
-
-    public function testLogsErrorWhenResponseIs504(): void
-    {
-        $endpoint = $this->createMock(EndpointInterface::class);
-        $response = $this->createResponseWithStatus($statusCode = 504);
-        $responseBody = 'bodyyy';
-        $errorMessage = 'service request failed due to 504 gateway timeout';
-
-        $this->logger
-            ->expects(self::once())
-            ->method('error')
-            ->with($errorMessage);
-
-        $this->expectExceptionObject(new DeserializableResponseException(
-            $this->deserializer,
-            new ErrorResponse(
-                $endpoint,
-                $errorMessage,
-                $statusCode,
-                $responseBody
-            )
-        ));
-
-        $this->strategy->handle($endpoint, $response, $responseBody);
-    }
-
-    public function testLogsErrorWhenResponseIs503(): void
-    {
-        $endpoint = $this->createMock(EndpointInterface::class);
-        $response = $this->createResponseWithStatus($statusCode = 503);
-        $responseBody = 'bodyyy';
-        $errorMessage = 'service request failed due to 503 service unavailable';
-
-        $this->logger
-            ->expects(self::once())
-            ->method('error')
-            ->with($errorMessage);
-
-        $this->expectExceptionObject(new DeserializableResponseException(
-            $this->deserializer,
-            new ErrorResponse(
-                $endpoint,
-                $errorMessage,
-                $statusCode,
-                $responseBody
-            )
-        ));
-
-        $this->strategy->handle($endpoint, $response, $responseBody);
-    }
-
-    public function testLogsErrorWhenResponseIs502(): void
-    {
-        $endpoint = $this->createMock(EndpointInterface::class);
-        $response = $this->createResponseWithStatus($statusCode = 502);
-        $responseBody = 'bodyyy';
-        $errorMessage = 'service request failed due to 502 bad gateway';
-
-        $this->logger
-            ->expects(self::once())
-            ->method('error')
-            ->with($errorMessage);
+            ->with(sprintf('Error response %d cannot be deserialized', $statusCode));
 
         $this->expectExceptionObject(new DeserializableResponseException(
             $this->deserializer,
@@ -168,5 +95,18 @@ class UnexpectedResponseStrategyTest extends TestCase
             ->willReturn($statusCode);
 
         return $mock;
+    }
+
+    /**
+     * @return array[]
+     */
+    public function statusProvider(): array
+    {
+        return [
+          [502, 'service request failed due to 502 bad gateway'],
+          [503, 'service request failed due to 503 service unavailable'],
+          [504, 'service request failed due to 504 gateway timeout'],
+          [666, 'Error response 666 cannot be deserialized'],
+        ];
     }
 }

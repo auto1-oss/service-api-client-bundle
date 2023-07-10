@@ -7,7 +7,7 @@ namespace Auto1\ServiceAPIClientBundle\Service;
 use Auto1\ServiceAPIClientBundle\Exception\Response\MalformedResponseException;
 use Auto1\ServiceAPIComponentsBundle\Service\Endpoint\EndpointInterface;
 
-interface Deserializer
+interface DeserializerInterface
 {
     /**
      * @template T of object

@@ -67,8 +67,8 @@ class GatewayTimeoutResponseStrategyTest extends TestCase
         $responseBody = 'some response';
         $errorMessage = 'service request failed due to 504 gateway timeout';
 
-        $resposne = $this->createMock(ResponseInterface::class);
-        $resposne->method('getStatusCode')->willReturn(504);
+        $response = $this->createMock(ResponseInterface::class);
+        $response->method('getStatusCode')->willReturn(504);
 
         $endpoint = $this->createMock(EndpointInterface::class);
 
@@ -79,7 +79,7 @@ class GatewayTimeoutResponseStrategyTest extends TestCase
 
         $this->expectException(GatewayTimeoutResponseException::class);
 
-        $this->strategy->handle($endpoint, $resposne, $responseBody);
+        $this->strategy->handle($endpoint, $response, $responseBody);
     }
 
     private function createResponseWithStatus(int $statusCode): ResponseInterface

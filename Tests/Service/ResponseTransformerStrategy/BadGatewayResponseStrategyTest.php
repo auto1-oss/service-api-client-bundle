@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Auto1\ServiceAPIClientBundle\Tests\Service\ResponseTransformerStrategy;
 
 use Auto1\ServiceAPIClientBundle\Exception\Response\BadGatewayResponseException;
-use Auto1\ServiceAPIClientBundle\Service\Deserializer;
+use Auto1\ServiceAPIClientBundle\Service\DeserializerInterface;
 use Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategy\BadGatewayResponseStrategy;
 use Auto1\ServiceAPIComponentsBundle\Service\Endpoint\EndpointInterface;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -15,11 +15,6 @@ use Psr\Log\LoggerInterface;
 
 class BadGatewayResponseStrategyTest extends TestCase
 {
-    /**
-     * @var Deserializer&MockObject
-     */
-    private $deserializer;
-
     /**
      * @var LoggerInterface&MockObject
      */
@@ -73,8 +68,8 @@ class BadGatewayResponseStrategyTest extends TestCase
         $responseBody = 'some response';
         $errorMessage = 'service request failed due to 502 bad gateway';
 
-        $resposne = $this->createMock(ResponseInterface::class);
-        $resposne->method('getStatusCode')->willReturn(502);
+        $response = $this->createMock(ResponseInterface::class);
+        $response->method('getStatusCode')->willReturn(502);
 
         $endpoint = $this->createMock(EndpointInterface::class);
 
@@ -85,7 +80,7 @@ class BadGatewayResponseStrategyTest extends TestCase
 
         $this->expectException(BadGatewayResponseException::class);
 
-        $this->strategy->handle($endpoint, $resposne, $responseBody);
+        $this->strategy->handle($endpoint, $response, $responseBody);
     }
 
     private function createResponseWithStatus(int $statusCode): ResponseInterface

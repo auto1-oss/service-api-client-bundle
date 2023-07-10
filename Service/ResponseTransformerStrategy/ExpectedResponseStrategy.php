@@ -4,25 +4,19 @@ declare(strict_types=1);
 
 namespace Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategy;
 
-use Auto1\ServiceAPIClientBundle\Service\Deserializer;
-use Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategy;
+use Auto1\ServiceAPIClientBundle\Service\DeserializerInterface;
+use Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategyInterface;
 use Auto1\ServiceAPIComponentsBundle\Service\Endpoint\EndpointInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerAwareTrait;
-use Psr\Log\NullLogger;
 
-class ExpectedResponseStrategy implements ResponseTransformerStrategy, LoggerAwareInterface
+class ExpectedResponseStrategy implements ResponseTransformerStrategyInterface
 {
-    use LoggerAwareTrait;
-
     private $deserializer;
 
     public function __construct(
-        Deserializer $deserializer
+        DeserializerInterface $deserializer
     ) {
         $this->deserializer = $deserializer;
-        $this->setLogger(new NullLogger());
     }
 
     public function supports(ResponseInterface $response): bool

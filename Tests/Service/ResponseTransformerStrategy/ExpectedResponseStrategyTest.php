@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Auto1\ServiceAPIClientBundle\Tests\Service\ResponseTransformerStrategy;
 
-use Auto1\ServiceAPIClientBundle\Service\Deserializer;
+use Auto1\ServiceAPIClientBundle\Service\DeserializerInterface;
 use Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategy\ExpectedResponseStrategy;
 use Auto1\ServiceAPIComponentsBundle\Service\Endpoint\EndpointInterface;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -14,7 +14,7 @@ use Psr\Http\Message\ResponseInterface;
 class ExpectedResponseStrategyTest extends TestCase
 {
     /**
-     * @var Deserializer&MockObject
+     * @var DeserializerInterface&MockObject
      */
     private $deserializer;
 
@@ -25,7 +25,7 @@ class ExpectedResponseStrategyTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->deserializer = $this->createMock(Deserializer::class);
+        $this->deserializer = $this->createMock(DeserializerInterface::class);
         $this->strategy = new ExpectedResponseStrategy($this->deserializer);
     }
 

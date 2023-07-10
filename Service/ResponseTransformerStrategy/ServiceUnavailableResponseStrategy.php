@@ -6,7 +6,7 @@ namespace Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategy;
 
 use Auto1\ServiceAPIClientBundle\DTO\ResponseTransformer\ErrorResponse;
 use Auto1\ServiceAPIClientBundle\Exception\Response\ServiceUnavailableResponseException;
-use Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategy;
+use Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategyInterface;
 use Auto1\ServiceAPIComponentsBundle\Service\Endpoint\EndpointInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerAwareInterface;
@@ -14,7 +14,7 @@ use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
 use Symfony\Component\HttpFoundation\Response;
 
-class ServiceUnavailableResponseStrategy implements ResponseTransformerStrategy, LoggerAwareInterface
+class ServiceUnavailableResponseStrategy implements ResponseTransformerStrategyInterface, LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
