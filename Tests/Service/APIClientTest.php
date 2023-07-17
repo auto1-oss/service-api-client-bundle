@@ -38,7 +38,7 @@ class APIClientTest extends TestCase
     /**
      * {@inheritdoc}
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->requestFactoryProphecy = $this->prophesize(RequestFactoryInterface::class);
         $this->responseTransformerProphecy = $this->prophesize(ResponseTransformerInterface::class);
@@ -48,10 +48,10 @@ class APIClientTest extends TestCase
     public function testSend()
     {
         $uriProphecy = $this->prophesize(UriInterface::class);
-        $uriProphecy->__call('getPath', [])->willReturn('somePath');
+        $uriProphecy->getPath()->willReturn('somePath');
         $requestProphecy = $this->prophesize(RequestInterface::class);
-        $requestProphecy->__call('getUri', [])->willReturn($uriProphecy->reveal());
-        $requestProphecy->__call('getHeaders', [])->willReturn(['someHeader']);
+        $requestProphecy->getUri()->willReturn($uriProphecy->reveal());
+        $requestProphecy->getHeaders()->willReturn(['someHeader']);
         $request = $requestProphecy->reveal();
         $response = $this->prophesize(ResponseInterface::class)->reveal();
         $object = new \stdClass();
@@ -60,19 +60,19 @@ class APIClientTest extends TestCase
         $serviceRequest = $this->prophesize(ServiceRequestInterface::class)->reveal();
 
         $this->requestFactoryProphecy
-            ->__call('create', [$serviceRequest])
+            ->create($serviceRequest)
             ->willReturn($request)
             ->shouldBeCalled()
         ;
 
         $this->clientProphecy
-            ->__call('sendRequest', [$request])
+            ->sendRequest($request)
             ->willReturn($response)
             ->shouldBeCalled()
         ;
 
         $this->responseTransformerProphecy
-            ->__call('transform', [$response, $serviceRequest])
+            ->transform($response, $serviceRequest)
             ->willReturn($object)
             ->shouldBeCalled()
         ;
