@@ -20,9 +20,6 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = null;
-        $rootNode = null;
-
         //Support for < 4.2
         if (method_exists(TreeBuilder::class, 'root')) {
             $treeBuilder = new TreeBuilder();

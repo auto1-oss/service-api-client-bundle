@@ -93,9 +93,7 @@ class RequestFactory implements RequestFactoryInterface
             $requestBody
         );
 
-        $httpRequest = $this->visitRequest($httpRequest, $endpoint->getRequestFormat());
-
-        return $httpRequest;
+        return $this->visitRequest($httpRequest, $endpoint->getRequestFormat());
     }
 
     /**

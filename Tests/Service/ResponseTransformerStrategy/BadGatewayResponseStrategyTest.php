@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Auto1\ServiceAPIClientBundle\Tests\Service\ResponseTransformerStrategy;
 
 use Auto1\ServiceAPIClientBundle\Exception\Response\BadGatewayResponseException;
-use Auto1\ServiceAPIClientBundle\Service\DeserializerInterface;
 use Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategy\BadGatewayResponseStrategy;
 use Auto1\ServiceAPIComponentsBundle\Service\Endpoint\EndpointInterface;
 use PHPUnit\Framework\MockObject\MockObject;

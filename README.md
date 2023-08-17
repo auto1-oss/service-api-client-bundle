@@ -5,7 +5,7 @@ For more details: [php-http/httplug clients and adapters](http://docs.php-http.o
 
 
 ## config.yml
-```json
+```yaml
 auto1_service_api_client:
     request_visitors:
         - '@visitor1'
