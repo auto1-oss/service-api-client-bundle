@@ -17,8 +17,6 @@ services:
         arguments:
             $endpointRegistry: '@auto1.api.endpoint.registry'
             $responseTransformerStrategies: !tagged_iterator response.transformer.strategies
-        calls:
-            - [setLogger, ['@logger']]
 
     auto1.api.request.visitor.content_type.file:
         class: Auto1\ServiceAPIClientBundle\Service\Request\Visitor\FileContentTypeRequestVisitor
