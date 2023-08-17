@@ -100,7 +100,7 @@ class APIClient implements APIClientInterface
         $objects = [];
         foreach ($responses as $key => $response) {
             $serviceRequest = $serviceRequests[$key];
-            $object[] = $this->responseTransformer->transform($response, $serviceRequest);
+            $objects[] = $this->responseTransformer->transform($response, $serviceRequest);
         }
 
         return $objects;

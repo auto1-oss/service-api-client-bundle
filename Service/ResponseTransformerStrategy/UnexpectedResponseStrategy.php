@@ -13,7 +13,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
-use Symfony\Component\HttpFoundation\Response;
 
 class UnexpectedResponseStrategy implements ResponseTransformerStrategyInterface, LoggerAwareInterface
 {
