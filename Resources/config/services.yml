@@ -1,5 +1,10 @@
 services:
 
+    Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategy\:
+        autowire: true
+        autoconfigure: true
+        resource: '../../Service/ResponseTransformerStrategy/*'
+
     auto1.api.previous_request:
         class: Symfony\Component\HttpFoundation\Request
         factory: ['@request_stack', 'getCurrentRequest']
@@ -14,6 +19,8 @@ services:
 
     auto1.api.response.strategy.transformer:
         class: Auto1\ServiceAPIClientBundle\Service\Response\ResponseStrategyTransformer
+        autowire: true
+        autoconfigure: true
         arguments:
             $endpointRegistry: '@auto1.api.endpoint.registry'
             $responseTransformerStrategies: !tagged_iterator response.transformer.strategies
@@ -96,6 +103,11 @@ services:
             - '%auto1_service_api_client.request_time_log_level%'
         calls:
             - [setLogger, ['@logger']]
+
+    auto1.api.symfony.deserializer:
+        autowire: true
+        autoconfigure: true
+        class: Auto1\ServiceAPIClientBundle\Service\SymfonyDeserializer
 
     # discovery
     auto1.api.http_client:

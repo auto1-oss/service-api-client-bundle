@@ -60,4 +60,9 @@ class ExpectedResponseStrategy implements ResponseTransformerStrategyInterface
             $responseBody
         );
     }
+
+    public static function getDefaultPriority(): int
+    {
+        return 100;
+    }
 }

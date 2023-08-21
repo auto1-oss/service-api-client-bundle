@@ -60,6 +60,6 @@ class UnexpectedResponseStrategy implements ResponseTransformerStrategyInterface
 
     public static function getDefaultPriority(): int
     {
-        return 100;
+        return 10;
     }
 }
