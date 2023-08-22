@@ -52,6 +52,6 @@ class GatewayTimeoutResponseStrategy implements ResponseTransformerStrategyInter
 
     public static function getDefaultPriority(): int
     {
-        return 30;
+        return -50;
     }
 }

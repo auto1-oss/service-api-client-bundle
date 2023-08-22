@@ -64,6 +64,6 @@ class UnauthorizedResponseStrategy implements ResponseTransformerStrategyInterfa
 
     public static function getDefaultPriority(): int
     {
-        return 40;
+        return -30;
     }
 }

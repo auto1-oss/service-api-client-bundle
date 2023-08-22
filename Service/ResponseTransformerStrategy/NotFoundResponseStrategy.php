@@ -74,6 +74,6 @@ class NotFoundResponseStrategy implements ResponseTransformerStrategyInterface, 
 
     public static function getDefaultPriority(): int
     {
-        return 60;
+        return -20;
     }
 }

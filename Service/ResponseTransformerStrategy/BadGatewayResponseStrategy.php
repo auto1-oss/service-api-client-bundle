@@ -53,6 +53,6 @@ class BadGatewayResponseStrategy implements ResponseTransformerStrategyInterface
 
     public static function getDefaultPriority(): int
     {
-        return 20;
+        return -60;
     }
 }

@@ -52,6 +52,6 @@ class ServiceUnavailableResponseStrategy implements ResponseTransformerStrategyI
 
     public static function getDefaultPriority(): int
     {
-        return 50;
+        return -40;
     }
 }
