@@ -50,4 +50,9 @@ class BadGatewayResponseStrategy implements ResponseTransformerStrategyInterface
 
         throw new BadGatewayResponseException(new ErrorResponse($endpoint, $message, $response->getStatusCode(), $responseBody));
     }
+
+    public static function getDefaultPriority(): int
+    {
+        return -60;
+    }
 }

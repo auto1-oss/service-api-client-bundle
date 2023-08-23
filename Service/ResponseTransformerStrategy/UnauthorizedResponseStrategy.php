@@ -61,4 +61,9 @@ class UnauthorizedResponseStrategy implements ResponseTransformerStrategyInterfa
 
         throw new NotAuthorizedException($errorDTO, $response->getStatusCode(), $errorDTO->getMessage());
     }
+
+    public static function getDefaultPriority(): int
+    {
+        return -30;
+    }
 }

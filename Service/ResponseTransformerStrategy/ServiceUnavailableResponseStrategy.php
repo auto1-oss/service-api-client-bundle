@@ -49,4 +49,9 @@ class ServiceUnavailableResponseStrategy implements ResponseTransformerStrategyI
 
         throw new ServiceUnavailableResponseException(new ErrorResponse($endpoint, $message, $response->getStatusCode(), $responseBody));
     }
+
+    public static function getDefaultPriority(): int
+    {
+        return -40;
+    }
 }

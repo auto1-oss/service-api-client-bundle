@@ -71,4 +71,9 @@ class NotFoundResponseStrategy implements ResponseTransformerStrategyInterface, 
 
         throw new NotFoundException($errorDTO, $response->getStatusCode(), $message);
     }
+
+    public static function getDefaultPriority(): int
+    {
+        return -20;
+    }
 }

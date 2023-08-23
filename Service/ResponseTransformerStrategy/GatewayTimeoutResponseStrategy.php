@@ -49,4 +49,9 @@ class GatewayTimeoutResponseStrategy implements ResponseTransformerStrategyInter
 
         throw new GatewayTimeoutResponseException(new ErrorResponse($endpoint, $message, $response->getStatusCode(), $responseBody));
     }
+
+    public static function getDefaultPriority(): int
+    {
+        return -50;
+    }
 }
