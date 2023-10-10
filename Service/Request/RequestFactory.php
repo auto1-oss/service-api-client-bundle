@@ -22,6 +22,8 @@ class RequestFactory implements RequestFactoryInterface
 {
     use LoggerAwareTrait;
 
+    const METHODS_WITHOUT_BODY = ['GET', 'HEAD', 'OPTIONS'];
+
     /**
      * @var EndpointRegistryInterface
      */
@@ -80,10 +82,21 @@ class RequestFactory implements RequestFactoryInterface
         $endpoint = $this->endpointRegistry->getEndpoint($serviceRequest);
         $uri = $this->getRequestUri($serviceRequest);
 
+        $isMethodWithoutBody = in_array($endpoint->getMethod(), self::METHODS_WITHOUT_BODY, true);
+        if ($serviceRequest instanceof StreamInterface && $isMethodWithoutBody) {
+            $msg = sprintf(
+                'AWS WAF does not support body with the following methods: %s',
+                implode('/', self::METHODS_WITHOUT_BODY)
+            );
+            $this->getLogger()->error($msg, ['requestURI' => $uri]);
+        }
+
         if ($serviceRequest instanceof StreamInterface) {
             $requestBody = $serviceRequest;
-        } else {
+        } elseif (!$isMethodWithoutBody)  {
             $requestBody = $this->serializer->serialize($serviceRequest, $endpoint->getRequestFormat());
+        } else {
+            $requestBody = null;
         }
 
         $httpRequest = $this->messageFactory->createRequest(
@@ -93,7 +106,9 @@ class RequestFactory implements RequestFactoryInterface
             $requestBody
         );
 
-        return $this->visitRequest($httpRequest, $endpoint->getRequestFormat());
+        $httpRequest = $this->visitRequest($httpRequest, $endpoint->getRequestFormat());
+
+        return $httpRequest;
     }
 
     /**
@@ -116,7 +131,7 @@ class RequestFactory implements RequestFactoryInterface
      *
      * @return UriInterface
      */
-    private function getRequestUri(ServiceRequestInterface $serviceRequest): UriInterface
+    private function getRequestUri(ServiceRequestInterface $serviceRequest)
     {
         $endpoint = $this->endpointRegistry->getEndpoint($serviceRequest);
         $baseUrl = $endpoint->getBaseUrl();
@@ -135,7 +150,7 @@ class RequestFactory implements RequestFactoryInterface
                 throw new InvalidArgumentException($message, $errorCode);
             }
             $value = $serviceRequest->$getterMethod();
-            $value = array_key_exists($key, $queryParams) ? urlencode((string)$value) : $value;
+            $value = array_key_exists($key, $queryParams) ? urlencode($value) : $value;
             $path = str_replace($placeholder, $value, $path);
         }
 
@@ -146,7 +161,9 @@ class RequestFactory implements RequestFactoryInterface
             throw new MalformedRequestException($message, $errorCode);
         }
 
-        return $this->uriFactory->createUri($baseUrl.$path);
+        $uri = $this->uriFactory->createUri($baseUrl.$path);
+
+        return $uri;
     }
 
     /**
