@@ -22,6 +22,8 @@ class RequestFactory implements RequestFactoryInterface
 {
     use LoggerAwareTrait;
 
+    const METHODS_WITHOUT_BODY = ['GET', 'HEAD', 'OPTIONS'];
+
     /**
      * @var EndpointRegistryInterface
      */
@@ -80,10 +82,21 @@ class RequestFactory implements RequestFactoryInterface
         $endpoint = $this->endpointRegistry->getEndpoint($serviceRequest);
         $uri = $this->getRequestUri($serviceRequest);
 
+        $isMethodWithoutBody = in_array($endpoint->getMethod(), self::METHODS_WITHOUT_BODY, true);
+        if ($serviceRequest instanceof StreamInterface && $isMethodWithoutBody) {
+            $msg = sprintf(
+                'AWS WAF does not support body with the following methods: %s',
+                implode('/', self::METHODS_WITHOUT_BODY)
+            );
+            $this->getLogger()->error($msg, ['requestURI' => $uri]);
+        }
+
         if ($serviceRequest instanceof StreamInterface) {
             $requestBody = $serviceRequest;
-        } else {
+        } elseif (!$isMethodWithoutBody)  {
             $requestBody = $this->serializer->serialize($serviceRequest, $endpoint->getRequestFormat());
+        } else {
+            $requestBody = null;
         }
 
         $httpRequest = $this->messageFactory->createRequest(
