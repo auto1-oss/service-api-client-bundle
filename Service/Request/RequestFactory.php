@@ -5,6 +5,7 @@ namespace Auto1\ServiceAPIClientBundle\Service\Request;
 use Auto1\ServiceAPIComponentsBundle\Exception\Request\InvalidArgumentException;
 use Auto1\ServiceAPIComponentsBundle\Exception\Request\MalformedRequestException;
 use Auto1\ServiceAPIComponentsBundle\Service\Endpoint\EndpointRegistryInterface;
+use Auto1\ServiceAPIComponentsBundle\Service\Endpoint\EndpointInterface;
 use Auto1\ServiceAPIComponentsBundle\Service\Logger\LoggerAwareTrait;
 use Http\Message\MessageFactory;
 use Http\Message\UriFactory;
@@ -21,6 +22,8 @@ use Auto1\ServiceAPIRequest\ServiceRequestInterface;
 class RequestFactory implements RequestFactoryInterface
 {
     use LoggerAwareTrait;
+
+    const METHODS_WITHOUT_BODY = ['GET', 'HEAD', 'OPTIONS'];
 
     /**
      * @var EndpointRegistryInterface
@@ -79,12 +82,7 @@ class RequestFactory implements RequestFactoryInterface
     {
         $endpoint = $this->endpointRegistry->getEndpoint($serviceRequest);
         $uri = $this->getRequestUri($serviceRequest);
-
-        if ($serviceRequest instanceof StreamInterface) {
-            $requestBody = $serviceRequest;
-        } else {
-            $requestBody = $this->serializer->serialize($serviceRequest, $endpoint->getRequestFormat());
-        }
+        $requestBody = $this->getRequestBody($serviceRequest, $endpoint);
 
         $httpRequest = $this->messageFactory->createRequest(
             $endpoint->getMethod(),
@@ -147,6 +145,26 @@ class RequestFactory implements RequestFactoryInterface
         }
 
         return $this->uriFactory->createUri($baseUrl.$path);
+    }
+
+    /**
+     * @param ServiceRequestInterface $serviceRequest
+     * @param EndpointInterface $endpoint
+     * @return mixed
+     */
+    private function getRequestBody(ServiceRequestInterface $serviceRequest, EndpointInterface $endpoint)
+    {
+        $isMethodWithoutBody = in_array($endpoint->getMethod(), self::METHODS_WITHOUT_BODY, true);
+
+        if ($isMethodWithoutBody) {
+            $requestBody = null;
+        } elseif ($serviceRequest instanceof StreamInterface) {
+            $requestBody = $serviceRequest;
+        } else  {
+            $requestBody = $this->serializer->serialize($serviceRequest, $endpoint->getRequestFormat());
+        }
+
+        return $requestBody;
     }
 
     /**
