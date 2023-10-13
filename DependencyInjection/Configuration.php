@@ -34,6 +34,9 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('request_time_log_level')->defaultValue(LogLevel::DEBUG)->end()
             ->end()
             ->children()
+                ->booleanNode('ignore_request_body_on_get')->defaultValue(false)->end()
+            ->end()
+            ->children()
                 ->arrayNode('request_visitors')
                     ->defaultValue([
                         [

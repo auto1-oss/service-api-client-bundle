@@ -51,6 +51,11 @@ class RequestFactory implements RequestFactoryInterface
     private $messageFactory;
 
     /**
+     * @var bool
+     */
+    private $ignoreBodyOnGetRequests;
+
+    /**
      * RequestFactory constructor.
      *
      * @param EndpointRegistryInterface       $endpointRegistry
@@ -58,19 +63,22 @@ class RequestFactory implements RequestFactoryInterface
      * @param RequestVisitorRegistryInterface $requestVisitorRegistry
      * @param UriFactory                      $uriFactory
      * @param MessageFactory                  $messageFactory
+     * @param bool                            $ignoreBodyOnGetRequests
      */
     public function __construct(
         EndpointRegistryInterface $endpointRegistry,
         SerializerInterface $serializer,
         RequestVisitorRegistryInterface $requestVisitorRegistry,
         UriFactory $uriFactory,
-        MessageFactory $messageFactory
+        MessageFactory $messageFactory,
+        bool $ignoreBodyOnGetRequests
     ) {
         $this->endpointRegistry = $endpointRegistry;
         $this->serializer = $serializer;
         $this->requestVisitorRegistry = $requestVisitorRegistry;
         $this->uriFactory = $uriFactory;
         $this->messageFactory = $messageFactory;
+        $this->ignoreBodyOnGetRequests = $ignoreBodyOnGetRequests;
     }
 
     /**
@@ -156,9 +164,11 @@ class RequestFactory implements RequestFactoryInterface
     {
         $isMethodWithoutBody = in_array($endpoint->getMethod(), self::METHODS_WITHOUT_BODY, true);
 
-        if ($isMethodWithoutBody) {
-            $requestBody = null;
-        } elseif ($serviceRequest instanceof StreamInterface) {
+        if ($isMethodWithoutBody && $this->ignoreBodyOnGetRequests) {
+            return null;
+        }
+
+        if ($serviceRequest instanceof StreamInterface) {
             $requestBody = $serviceRequest;
         } else  {
             $requestBody = $this->serializer->serialize($serviceRequest, $endpoint->getRequestFormat());

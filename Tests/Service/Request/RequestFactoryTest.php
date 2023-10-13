@@ -81,7 +81,7 @@ class RequestFactoryTest extends TestCase
     {
         $baseUrl = 'baseUrl';
         $routeString = 'routeString';
-        $requestMethod = 'POST';
+        $requestMethod = 'GET';
         $requestBody = '{requestBody:requestBody}';
         $endpointProphecy = $this->prophesize(EndpointInterface::class);
         $endpointProphecy->getBaseUrl()
@@ -151,7 +151,8 @@ class RequestFactoryTest extends TestCase
             $this->serializerProphecy->reveal(),
             $this->requestVisitorRegistryProphecy->reveal(),
             $this->uriFactoryProphecy->reveal(),
-            $this->messageFactoryProphecy->reveal()
+            $this->messageFactoryProphecy->reveal(),
+            false
         );
 
         self::assertInstanceOf(
@@ -169,7 +170,7 @@ class RequestFactoryTest extends TestCase
         $routeString = '/routeString?first-param={firstParam}&second-param=ignored value';
         $originParamValue = 'value with whitespaces';
         $requestMethod = 'GET';
-        $requestBody = null;
+        $requestBody = '';
 
         $expectedUri = 'baseUrl/routeString?first-param=value+with+whitespaces&second-param=ignored value';
 
@@ -213,7 +214,7 @@ class RequestFactoryTest extends TestCase
         $this->serializerProphecy
             ->serialize($serviceRequest, EndpointInterface::FORMAT_JSON)
             ->willReturn($requestBody)
-            ->shouldNotBeCalled()
+            ->shouldBeCalled()
         ;
 
         $this->uriFactoryProphecy
@@ -249,7 +250,8 @@ class RequestFactoryTest extends TestCase
             $this->serializerProphecy->reveal(),
             $this->requestVisitorRegistryProphecy->reveal(),
             $this->uriFactoryProphecy->reveal(),
-            $this->messageFactoryProphecy->reveal()
+            $this->messageFactoryProphecy->reveal(),
+            false
         );
 
         self::assertInstanceOf(
@@ -290,7 +292,8 @@ class RequestFactoryTest extends TestCase
             $this->serializerProphecy->reveal(),
             $this->requestVisitorRegistryProphecy->reveal(),
             $this->uriFactoryProphecy->reveal(),
-            $this->messageFactoryProphecy->reveal()
+            $this->messageFactoryProphecy->reveal(),
+            false
         );
 
         self::assertInstanceOf(
