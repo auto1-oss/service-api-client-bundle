@@ -10,10 +10,13 @@ auto1_service_api_client:
     request_visitors:
         - '@visitor1'
         - '@visitor2'
+    strict_mode: false
 ```
-Request visitors (RequestVisitorInterface) are aimed to modify your Request - like adding custom headers.
+- **request_visitors** - Request visitors (RequestVisitorInterface) are aimed to modify your Request - like adding custom headers.
 You can also TAG services with '**auto1.api.request_visitor**' to make them visitors.
 **Warning!** By setting this configuration you will override default values!
+- **strict_mode** - boolean, ```false``` by default. If it is ```true``` the request factory ignores any request body for GET, HEAD, OPTIONS and TRACE HTTP methods. 
+In other words, client will always send such requests without body.
 
 ## Example of EP definition (yaml): 
 ```yaml

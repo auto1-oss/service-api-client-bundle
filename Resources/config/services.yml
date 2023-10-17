@@ -81,7 +81,7 @@ services:
             - '@auto1.api.request.visitor.registry'
             - '@auto1.api.uri_factory'
             - '@auto1.api.message_factory'
-            - '%auto1_service_api_client.ignore_body_on_get_requests%'
+            - '%auto1_service_api_client.strict_mode%'
         calls:
             - [setLogger, ['@logger']]
 

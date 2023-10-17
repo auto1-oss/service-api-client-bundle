@@ -23,7 +23,7 @@ class RequestFactory implements RequestFactoryInterface
 {
     use LoggerAwareTrait;
 
-    const METHODS_WITHOUT_BODY = ['GET', 'HEAD', 'OPTIONS'];
+    private const METHODS_WITHOUT_BODY = ['GET', 'HEAD', 'OPTIONS', 'TRACE'];
 
     /**
      * @var EndpointRegistryInterface
