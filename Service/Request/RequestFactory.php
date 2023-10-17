@@ -53,7 +53,7 @@ class RequestFactory implements RequestFactoryInterface
     /**
      * @var bool
      */
-    private $ignoreBodyOnGetRequests;
+    private $strictModeEnabled;
 
     /**
      * RequestFactory constructor.
@@ -63,7 +63,7 @@ class RequestFactory implements RequestFactoryInterface
      * @param RequestVisitorRegistryInterface $requestVisitorRegistry
      * @param UriFactory                      $uriFactory
      * @param MessageFactory                  $messageFactory
-     * @param bool                            $ignoreBodyOnGetRequests
+     * @param bool                            $strictModeEnabled
      */
     public function __construct(
         EndpointRegistryInterface $endpointRegistry,
@@ -71,14 +71,14 @@ class RequestFactory implements RequestFactoryInterface
         RequestVisitorRegistryInterface $requestVisitorRegistry,
         UriFactory $uriFactory,
         MessageFactory $messageFactory,
-        bool $ignoreBodyOnGetRequests
+        bool $strictModeEnabled
     ) {
         $this->endpointRegistry = $endpointRegistry;
         $this->serializer = $serializer;
         $this->requestVisitorRegistry = $requestVisitorRegistry;
         $this->uriFactory = $uriFactory;
         $this->messageFactory = $messageFactory;
-        $this->ignoreBodyOnGetRequests = $ignoreBodyOnGetRequests;
+        $this->strictModeEnabled = $strictModeEnabled;
     }
 
     /**
@@ -162,9 +162,7 @@ class RequestFactory implements RequestFactoryInterface
      */
     private function getRequestBody(ServiceRequestInterface $serviceRequest, EndpointInterface $endpoint)
     {
-        $isMethodWithoutBody = in_array($endpoint->getMethod(), self::METHODS_WITHOUT_BODY, true);
-
-        if ($isMethodWithoutBody && $this->ignoreBodyOnGetRequests) {
+        if ($this->isMethodWithoutBody($endpoint->getMethod()) && $this->strictModeEnabled) {
             return null;
         }
 
@@ -233,5 +231,10 @@ class RequestFactory implements RequestFactoryInterface
     private function trimCurlyBrackets($str)
     {
         return trim($str, '{}');
+    }
+
+    private function isMethodWithoutBody(string $method): bool
+    {
+        return in_array($method, self::METHODS_WITHOUT_BODY, true);
     }
 }
