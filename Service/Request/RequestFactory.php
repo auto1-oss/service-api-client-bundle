@@ -5,6 +5,7 @@ namespace Auto1\ServiceAPIClientBundle\Service\Request;
 use Auto1\ServiceAPIComponentsBundle\Exception\Request\InvalidArgumentException;
 use Auto1\ServiceAPIComponentsBundle\Exception\Request\MalformedRequestException;
 use Auto1\ServiceAPIComponentsBundle\Service\Endpoint\EndpointRegistryInterface;
+use Auto1\ServiceAPIComponentsBundle\Service\Endpoint\EndpointInterface;
 use Auto1\ServiceAPIComponentsBundle\Service\Logger\LoggerAwareTrait;
 use Http\Message\MessageFactory;
 use Http\Message\UriFactory;
@@ -21,6 +22,8 @@ use Auto1\ServiceAPIRequest\ServiceRequestInterface;
 class RequestFactory implements RequestFactoryInterface
 {
     use LoggerAwareTrait;
+
+    private const METHODS_WITHOUT_BODY = ['GET', 'HEAD', 'OPTIONS', 'TRACE'];
 
     /**
      * @var EndpointRegistryInterface
@@ -48,6 +51,11 @@ class RequestFactory implements RequestFactoryInterface
     private $messageFactory;
 
     /**
+     * @var bool
+     */
+    private $strictModeEnabled;
+
+    /**
      * RequestFactory constructor.
      *
      * @param EndpointRegistryInterface       $endpointRegistry
@@ -55,19 +63,22 @@ class RequestFactory implements RequestFactoryInterface
      * @param RequestVisitorRegistryInterface $requestVisitorRegistry
      * @param UriFactory                      $uriFactory
      * @param MessageFactory                  $messageFactory
+     * @param bool                            $strictModeEnabled
      */
     public function __construct(
         EndpointRegistryInterface $endpointRegistry,
         SerializerInterface $serializer,
         RequestVisitorRegistryInterface $requestVisitorRegistry,
         UriFactory $uriFactory,
-        MessageFactory $messageFactory
+        MessageFactory $messageFactory,
+        bool $strictModeEnabled
     ) {
         $this->endpointRegistry = $endpointRegistry;
         $this->serializer = $serializer;
         $this->requestVisitorRegistry = $requestVisitorRegistry;
         $this->uriFactory = $uriFactory;
         $this->messageFactory = $messageFactory;
+        $this->strictModeEnabled = $strictModeEnabled;
     }
 
     /**
@@ -79,12 +90,7 @@ class RequestFactory implements RequestFactoryInterface
     {
         $endpoint = $this->endpointRegistry->getEndpoint($serviceRequest);
         $uri = $this->getRequestUri($serviceRequest);
-
-        if ($serviceRequest instanceof StreamInterface) {
-            $requestBody = $serviceRequest;
-        } else {
-            $requestBody = $this->serializer->serialize($serviceRequest, $endpoint->getRequestFormat());
-        }
+        $requestBody = $this->getRequestBody($serviceRequest, $endpoint);
 
         $httpRequest = $this->messageFactory->createRequest(
             $endpoint->getMethod(),
@@ -150,6 +156,24 @@ class RequestFactory implements RequestFactoryInterface
     }
 
     /**
+     * @param ServiceRequestInterface $serviceRequest
+     * @param EndpointInterface $endpoint
+     * @return mixed
+     */
+    private function getRequestBody(ServiceRequestInterface $serviceRequest, EndpointInterface $endpoint)
+    {
+        if ($this->isMethodWithoutBody($endpoint->getMethod()) && $this->strictModeEnabled) {
+            return null;
+        }
+
+        if ($serviceRequest instanceof StreamInterface) {
+            return $serviceRequest;
+        }
+
+        return $this->serializer->serialize($serviceRequest, $endpoint->getRequestFormat());
+    }
+
+    /**
      * @param string $path
      *
      * @return bool
@@ -205,5 +229,10 @@ class RequestFactory implements RequestFactoryInterface
     private function trimCurlyBrackets($str)
     {
         return trim($str, '{}');
+    }
+
+    private function isMethodWithoutBody(string $method): bool
+    {
+        return in_array($method, self::METHODS_WITHOUT_BODY, true);
     }
 }

@@ -26,5 +26,6 @@ class Auto1ServiceAPIClientExtension extends Extension
         $container->setParameter('auto1_service_api_client.request_visitors', $config['request_visitors']);
         $container->setParameter('auto1_service_api_client.propagate_headers', $config['propagate_headers']);
         $container->setParameter('auto1_service_api_client.request_time_log_level', $config['request_time_log_level']);
+        $container->setParameter('auto1_service_api_client.strict_mode', $config['strict_mode']);
     }
 }

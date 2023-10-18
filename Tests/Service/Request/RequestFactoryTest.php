@@ -151,7 +151,8 @@ class RequestFactoryTest extends TestCase
             $this->serializerProphecy->reveal(),
             $this->requestVisitorRegistryProphecy->reveal(),
             $this->uriFactoryProphecy->reveal(),
-            $this->messageFactoryProphecy->reveal()
+            $this->messageFactoryProphecy->reveal(),
+            false
         );
 
         self::assertInstanceOf(
@@ -249,7 +250,8 @@ class RequestFactoryTest extends TestCase
             $this->serializerProphecy->reveal(),
             $this->requestVisitorRegistryProphecy->reveal(),
             $this->uriFactoryProphecy->reveal(),
-            $this->messageFactoryProphecy->reveal()
+            $this->messageFactoryProphecy->reveal(),
+            false
         );
 
         self::assertInstanceOf(
@@ -290,7 +292,8 @@ class RequestFactoryTest extends TestCase
             $this->serializerProphecy->reveal(),
             $this->requestVisitorRegistryProphecy->reveal(),
             $this->uriFactoryProphecy->reveal(),
-            $this->messageFactoryProphecy->reveal()
+            $this->messageFactoryProphecy->reveal(),
+            false
         );
 
         self::assertInstanceOf(
