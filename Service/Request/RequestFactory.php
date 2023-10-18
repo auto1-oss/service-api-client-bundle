@@ -167,12 +167,10 @@ class RequestFactory implements RequestFactoryInterface
         }
 
         if ($serviceRequest instanceof StreamInterface) {
-            $requestBody = $serviceRequest;
-        } else  {
-            $requestBody = $this->serializer->serialize($serviceRequest, $endpoint->getRequestFormat());
+            return $serviceRequest;
         }
 
-        return $requestBody;
+        return $this->serializer->serialize($serviceRequest, $endpoint->getRequestFormat());
     }
 
     /**
