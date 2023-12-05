@@ -301,4 +301,103 @@ class RequestFactoryTest extends TestCase
             $requestBuilder->create($this->serviceRequestProphecy->reveal())
         );
     }
+
+    /**
+     * @return void
+     */
+    public function testBuildFlowWithQueryDashParams()
+    {
+        $baseUrl = 'baseUrl';
+        $routeString = '/routeString?first-param={first-param}&second-param=ignored value';
+        $originParamValue = 'value with whitespaces';
+        $requestMethod = 'GET';
+        $requestBody = '';
+
+        $expectedUri = 'baseUrl/routeString?first-param=value+with+whitespaces&second-param=ignored value';
+
+        $endpointProphecy = $this->prophesize(EndpointInterface::class);
+        $endpointProphecy->getBaseUrl()
+            ->willReturn($baseUrl)
+            ->shouldBeCalled()
+        ;
+        $endpointProphecy->getPath()
+            ->willReturn($routeString)
+            ->shouldBeCalled()
+        ;
+        $endpointProphecy->getMethod()
+            ->willReturn($requestMethod)
+            ->shouldBeCalled()
+        ;
+        $endpointProphecy->getRequestFormat()
+            ->willReturn(EndpointInterface::FORMAT_JSON)
+            ->shouldBeCalled()
+        ;
+        $endpoint = $endpointProphecy->reveal();
+
+        $uri = $this->prophesize(UriInterface::class)->reveal();
+        $request = $this->prophesize(RequestInterface::class)->reveal();
+
+        // Mock non existing method of ServiceRequest `getParam`
+        $serviceRequest = $this->getMockBuilder(ServiceRequestInterface::class)
+            ->setMethods(['getFirstParam'])
+            ->getMock();
+
+        $serviceRequest
+            ->method('getFirstParam')
+            ->willReturn($originParamValue);
+
+        $this->endpointRegistryProphecy
+            ->getEndpoint($serviceRequest)
+            ->willReturn($endpoint)
+            ->shouldBeCalled()
+        ;
+
+        $this->serializerProphecy
+            ->serialize($serviceRequest, EndpointInterface::FORMAT_JSON)
+            ->willReturn($requestBody)
+            ->shouldBeCalled()
+        ;
+
+        $this->uriFactoryProphecy
+            ->createUri($expectedUri)
+            ->willReturn($uri)
+            ->shouldBeCalled()
+        ;
+
+        $this->messageFactoryProphecy
+            ->createRequest(
+                $requestMethod,
+                $uri,
+                [],
+                $requestBody,
+            )
+            ->willReturn($request)
+            ->shouldBeCalled()
+        ;
+
+        $this->requestVisitorRegistryProphecy
+            ->getRegisteredRequestVisitors(EndpointInterface::FORMAT_JSON)
+            ->willReturn([])
+            ->shouldBeCalled()
+        ;
+
+        $this->requestDecoratorProphecy
+            ->visit($request)
+            ->shouldNotBeCalled()
+        ;
+
+        $requestBuilder = new RequestFactory(
+            $this->endpointRegistryProphecy->reveal(),
+            $this->serializerProphecy->reveal(),
+            $this->requestVisitorRegistryProphecy->reveal(),
+            $this->uriFactoryProphecy->reveal(),
+            $this->messageFactoryProphecy->reveal(),
+            false
+        );
+
+        self::assertInstanceOf(
+            RequestInterface::class,
+            $requestBuilder->create($serviceRequest)
+        );
+    }
 }

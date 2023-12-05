@@ -130,10 +130,10 @@ class RequestFactory implements RequestFactoryInterface
         $queryParams = $this->parseQueryParams($path);
 
         //check for placeholders
-        preg_match_all('/{(\w*)}/', $path, $matches);
+        preg_match_all('/{([\w-]*)}/', $path, $matches);
         foreach ($matches[0] as $index => $placeholder) {
             $key = $matches[1][$index];
-            $getterMethod = 'get'.ucfirst($key);
+            $getterMethod = 'get'.str_replace('-', '', ucwords($key, '-'));
             if (!method_exists($serviceRequest, $getterMethod)) {
                 $message = 'Invalid request path argumentAlias';
                 $errorCode = Response::HTTP_BAD_REQUEST;
