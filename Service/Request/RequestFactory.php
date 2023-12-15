@@ -71,7 +71,7 @@ class RequestFactory implements RequestFactoryInterface
         RequestVisitorRegistryInterface $requestVisitorRegistry,
         UriFactory $uriFactory,
         MessageFactory $messageFactory,
-        bool $strictModeEnabled
+        bool $strictModeEnabled = false
     ) {
         $this->endpointRegistry = $endpointRegistry;
         $this->serializer = $serializer;
