@@ -2,6 +2,7 @@
 
 namespace Auto1\ServiceAPIClientBundle\Service\Response;
 
+use Auto1\ServiceAPIClientBundle\Exception\Response\NotAuthorizedException;
 use Auto1\ServiceAPIComponentsBundle\Service\Endpoint\EndpointRegistryInterface;
 use Auto1\ServiceAPIComponentsBundle\Service\Logger\LoggerAwareTrait;
 use Psr\Http\Message\ResponseInterface;
@@ -87,6 +88,13 @@ class ResponseTransformer implements ResponseTransformerInterface
                 $errorDTO->setStatus($response->getStatusCode());
                 $errorDTO->setMessage($message);
                 throw new NotFoundException($errorDTO, $errorDTO->getStatus(), $errorDTO->getMessage());
+            }
+
+            if ($response->getStatusCode() === Response::HTTP_UNAUTHORIZED) {
+                $errorDTO = new ErrorResponse();
+                $errorDTO->setStatus($response->getStatusCode());
+                $errorDTO->setMessage($response->getReasonPhrase());
+                throw new NotAuthorizedException($errorDTO, $errorDTO->getStatus(), $errorDTO->getMessage());
             }
 
             /* All other errors */
