@@ -2,6 +2,8 @@
 
 namespace Auto1\ServiceAPIClientBundle\Tests\Service;
 
+use Auto1\ServiceAPIClientBundle\Exception\Response\NotAuthorizedException;
+use Auto1\ServiceAPIClientBundle\Exception\Response\NotFoundException;
 use Auto1\ServiceAPIComponentsBundle\Service\Endpoint\EndpointInterface;
 use Auto1\ServiceAPIComponentsBundle\Service\Endpoint\EndpointRegistryInterface;
 use PHPUnit\Framework\TestCase;
@@ -22,6 +24,10 @@ use Symfony\Component\Serializer\Exception\UnexpectedValueException;
  */
 class ResponseTransformerTest extends TestCase
 {
+    private const RESPONSE_CLASS = 'Auto1ResponseClass';
+    private const DATE_FORMAT = 'Y-m-d';
+    private const RESPONSE_BODY_CONTENT = '{$responseBodyContent:$responseBodyContent}';
+
     /**
      * @var EndpointRegistryInterface|ObjectProphecy
      */
@@ -41,64 +47,26 @@ class ResponseTransformerTest extends TestCase
         $this->serializerProphecy = $this->prophesize(SerializerInterface::class);
     }
 
-    /**
-     * @return void
-     */
-    public function testTransformSuccess()
+    public function testTransformSuccess(): void
     {
-        $responseBodyContent = '{$responseBodyContent:$responseBodyContent}';
-        $successStatusCode = Response::HTTP_CREATED;
-        $object = new \stdClass();
-        $objectClass = 'TransformedClass';
-        $format = EndpointInterface::FORMAT_JSON;
-        $dateFormat = 'Y-m-d';
+        $endpointProphecy = $this->createEndpointProphecy();
+        $responseProphecy = $this->createResponseProphecy(Response::HTTP_CREATED);
 
-        $responseBodyProphecy = $this->prophesize(StreamInterface::class);
-        $responseBodyProphecy->getContents()
-            ->willReturn($responseBodyContent)
-            ->shouldBeCalled()
-        ;
-        /** @var StreamInterface $responseBody */
-        $responseBody = $responseBodyProphecy->reveal();
-
-        $responseProphecy = $this->prophesize(ResponseInterface::class);
-        $responseProphecy->getBody()
-            ->willReturn($responseBody)
-            ->shouldBeCalled()
-        ;
-        $responseProphecy->getStatusCode()
-            ->willReturn($successStatusCode)
-            ->shouldBeCalled()
-        ;
-        /** @var ResponseInterface $response */
-        $response = $responseProphecy->reveal();
-
-        $endpointProphecy = $this->prophesize(EndpointInterface::class);
-        $endpointProphecy->getResponseClass()
-            ->willReturn($objectClass)
-            ->shouldBeCalled()
-        ;
-        $endpointProphecy->getResponseFormat()
-            ->willReturn($format)
-            ->shouldBeCalled()
-        ;
-        $endpointProphecy->getDateTimeFormat()
-            ->willReturn($dateFormat)
-            ->shouldBeCalled()
-        ;
-
-        /** @var ServiceRequestInterface $serviceRequest */
-        $serviceRequest = $this->prophesize(ServiceRequestInterface::class)->reveal();
-
+        $serviceRequest = $this->prophesize(ServiceRequestInterface::class);
         $this->endpointRegistryProphecy
             ->getEndpoint($serviceRequest)
-            ->willReturn($endpointProphecy->reveal())
+            ->willReturn($endpointProphecy)
             ->shouldBeCalled()
         ;
 
         $this->serializerProphecy
-            ->deserialize($responseBodyContent, $objectClass, $format, [DateTimeNormalizer::FORMAT_KEY => $dateFormat])
-            ->willReturn($object)
+            ->deserialize(
+                self::RESPONSE_BODY_CONTENT,
+                self::RESPONSE_CLASS,
+                EndpointInterface::FORMAT_JSON,
+                [DateTimeNormalizer::FORMAT_KEY => self::DATE_FORMAT]
+            )
+            ->willReturn(new \stdClass())
             ->shouldBeCalled()
         ;
 
@@ -107,79 +75,135 @@ class ResponseTransformerTest extends TestCase
             $this->serializerProphecy->reveal()
         );
 
-        $responseTransformer->transform($response, $serviceRequest);
+        $responseTransformer->transform($responseProphecy->reveal(), $serviceRequest->reveal());
     }
 
-    /**
-     * @return void
-     */
-    public function testTransformFails()
+    public function testDeserializationFails(): void
     {
         $this->expectException(ResponseException::class);
 
-        $responseBodyContent = '{$responseBodyContent:$responseBodyContent}';
-        $failedStatusCode = Response::HTTP_INTERNAL_SERVER_ERROR;
-        $objectClass = 'TransformedClass';
-        $format = EndpointInterface::FORMAT_JSON;
-        $dateFormat = 'Y-m-d';
+        $endpointProphecy = $this->createEndpointProphecy();
+        $responseProphecy = $this->createResponseProphecy(Response::HTTP_CREATED);
 
-        $responseBodyProphecy = $this->prophesize(StreamInterface::class);
-        $responseBodyProphecy->getContents()
-            ->willReturn($responseBodyContent)
-            ->shouldBeCalled()
-        ;
-        /** @var StreamInterface $responseBody */
-        $responseBody = $responseBodyProphecy->reveal();
-
-        $responseProphecy = $this->prophesize(ResponseInterface::class);
-        $responseProphecy->getBody()
-            ->willReturn($responseBody)
-            ->shouldBeCalled()
-        ;
-        $responseProphecy->getStatusCode()
-            ->willReturn($failedStatusCode)
-            ->shouldBeCalled()
-        ;
-        $responseProphecy->getReasonPhrase()
-            ->willReturn('somePhrase')
-            ->shouldBeCalled()
-        ;
-        /** @var ResponseInterface $response */
-        $response = $responseProphecy->reveal();
-
-        $endpointProphecy = $this->prophesize(EndpointInterface::class);
-        $endpointProphecy->getResponseClass()
-            ->willReturn($objectClass)
-            ->shouldBeCalled()
-        ;
-        $endpointProphecy->getResponseFormat()
-            ->willReturn($format)
-            ->shouldBeCalled()
-        ;
-        $endpointProphecy->getDateTimeFormat()
-            ->willReturn($dateFormat)
-            ->shouldBeCalled()
-        ;
-        $endpoint = $endpointProphecy->reveal();
-
+        $serviceRequest = $this->prophesize(ServiceRequestInterface::class);
         $this->endpointRegistryProphecy
-            ->getEndpoint(Argument::type(ServiceRequestInterface::class))
-            ->willReturn($endpoint)
+            ->getEndpoint($serviceRequest)
+            ->willReturn($endpointProphecy)
             ->shouldBeCalled()
         ;
-
-        /** @var ServiceRequestInterface $serviceRequest */
-        $serviceRequest = $this->prophesize(ServiceRequestInterface::class)->reveal();
 
         $this->serializerProphecy
             ->deserialize(Argument::any(), Argument::any(), Argument::any(), Argument::any())
             ->willThrow(new UnexpectedValueException());
+        ;
 
         $responseTransformer = new ResponseTransformer(
             $this->endpointRegistryProphecy->reveal(),
             $this->serializerProphecy->reveal()
         );
 
-        $responseTransformer->transform($response, $serviceRequest);
+        $responseTransformer->transform($responseProphecy->reveal(), $serviceRequest->reveal());
+    }
+
+    /**
+     * @param ObjectProphecy|ResponseInterface $response
+     * @dataProvider transformFailsDataProvider
+     */
+    public function testTransformFails($response, string $expectedException): void
+    {
+        $this->expectException($expectedException);
+
+        $endpoint = $this->createEndpointProphecy();
+        $serviceRequest = $this->prophesize(ServiceRequestInterface::class);
+        $this->endpointRegistryProphecy
+            ->getEndpoint($serviceRequest)
+            ->willReturn($endpoint)
+            ->shouldBeCalled()
+        ;
+
+        $this->serializerProphecy
+            ->deserialize(Argument::any(), Argument::any(), Argument::any(), Argument::any())
+            ->shouldNotBeCalled()
+        ;
+
+        $responseTransformer = new ResponseTransformer(
+            $this->endpointRegistryProphecy->reveal(),
+            $this->serializerProphecy->reveal()
+        );
+
+        $responseTransformer->transform($response->reveal(), $serviceRequest->reveal());
+    }
+
+    private function transformFailsDataProvider(): \Generator
+    {
+        $reasonPhrase = Response::$statusTexts[Response::HTTP_INTERNAL_SERVER_ERROR];
+        yield Response::HTTP_INTERNAL_SERVER_ERROR => [
+            $this->createResponseProphecy(Response::HTTP_INTERNAL_SERVER_ERROR, $reasonPhrase),
+            ResponseException::class
+        ];
+
+        yield Response::HTTP_NOT_FOUND => [
+            $this->createResponseProphecy(Response::HTTP_NOT_FOUND),
+            NotFoundException::class
+        ];
+
+        $reasonPhrase = Response::$statusTexts[Response::HTTP_UNAUTHORIZED];
+        yield Response::HTTP_UNAUTHORIZED => [
+            $this->createResponseProphecy(Response::HTTP_UNAUTHORIZED, $reasonPhrase),
+            NotAuthorizedException::class
+        ];
+    }
+
+    /**
+     * @return EndpointInterface|ObjectProphecy
+     */
+    private function createEndpointProphecy()
+    {
+        $endpointProphecy = $this->prophesize(EndpointInterface::class);
+        $endpointProphecy->getResponseClass()
+            ->willReturn(self::RESPONSE_CLASS)
+            ->shouldBeCalled()
+        ;
+        $endpointProphecy->getResponseFormat()
+            ->willReturn(EndpointInterface::FORMAT_JSON)
+            ->shouldBeCalled()
+        ;
+        $endpointProphecy->getDateTimeFormat()
+            ->willReturn(self::DATE_FORMAT)
+            ->shouldBeCalled()
+        ;
+
+        return $endpointProphecy;
+    }
+
+    /**
+     * @return ObjectProphecy|ResponseInterface
+     */
+    private function createResponseProphecy(int $statusCode, ?string $reasonPhrase = null)
+    {
+        $responseBodyProphecy = $this->prophesize(StreamInterface::class);
+        $responseBodyProphecy->getContents()
+            ->willReturn(self::RESPONSE_BODY_CONTENT)
+            ->shouldBeCalled()
+        ;
+
+        $responseProphecy = $this->prophesize(ResponseInterface::class);
+        $responseProphecy->getBody()
+            ->willReturn($responseBodyProphecy)
+            ->shouldBeCalled()
+        ;
+        $responseProphecy->getStatusCode()
+            ->willReturn($statusCode)
+            ->shouldBeCalled()
+        ;
+
+        if ($reasonPhrase !== null) {
+            $responseProphecy->getReasonPhrase()
+                ->willReturn($reasonPhrase)
+                ->shouldBeCalled()
+            ;
+        }
+
+        return $responseProphecy;
     }
 }
