@@ -2,18 +2,19 @@
 
 namespace Auto1\ServiceAPIClientBundle\Service\Response;
 
+use Auto1\ServiceAPIClientBundle\DTO\ErrorResponse;
+use Auto1\ServiceAPIClientBundle\Exception\Response\MalformedResponseException;
+use Auto1\ServiceAPIClientBundle\Exception\Response\NotAuthorizedException;
+use Auto1\ServiceAPIClientBundle\Exception\Response\NotFoundException;
+use Auto1\ServiceAPIClientBundle\Exception\ResponseException;
 use Auto1\ServiceAPIComponentsBundle\Service\Endpoint\EndpointRegistryInterface;
 use Auto1\ServiceAPIComponentsBundle\Service\Logger\LoggerAwareTrait;
+use Auto1\ServiceAPIRequest\ServiceRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
-use Auto1\ServiceAPIClientBundle\DTO\ErrorResponse;
-use Auto1\ServiceAPIClientBundle\Exception\Response\MalformedResponseException;
-use Auto1\ServiceAPIClientBundle\Exception\Response\NotFoundException;
-use Auto1\ServiceAPIClientBundle\Exception\ResponseException;
-use Auto1\ServiceAPIRequest\ServiceRequestInterface;
 
 /**
  * Class ResponseTransformer
@@ -87,6 +88,13 @@ class ResponseTransformer implements ResponseTransformerInterface
                 $errorDTO->setStatus($response->getStatusCode());
                 $errorDTO->setMessage($message);
                 throw new NotFoundException($errorDTO, $errorDTO->getStatus(), $errorDTO->getMessage());
+            }
+
+            if ($response->getStatusCode() === Response::HTTP_UNAUTHORIZED) {
+                $errorDTO = new ErrorResponse();
+                $errorDTO->setStatus($response->getStatusCode());
+                $errorDTO->setMessage($response->getReasonPhrase());
+                throw new NotAuthorizedException($errorDTO, $errorDTO->getStatus(), $errorDTO->getMessage());
             }
 
             /* All other errors */
