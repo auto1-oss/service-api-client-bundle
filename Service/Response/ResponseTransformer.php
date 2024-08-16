@@ -82,11 +82,13 @@ class ResponseTransformer implements ResponseTransformerInterface
 
             /* throw NotFound for 404 */
             if ($response->getStatusCode() === Response::HTTP_NOT_FOUND) {
-                $classParts = explode('\\', $responseClass);
-                $message = sprintf('%s not found', end($classParts));
+                if (!empty($responseClass)) {
+                    $classParts = explode('\\', $responseClass);
+                    $message = sprintf('%s not found', end($classParts));
+                }
                 $errorDTO = new ErrorResponse();
                 $errorDTO->setStatus($response->getStatusCode());
-                $errorDTO->setMessage($message);
+                $errorDTO->setMessage($message ?? Response::$statusTexts[Response::HTTP_NOT_FOUND]);
                 throw new NotFoundException($errorDTO, $errorDTO->getStatus(), $errorDTO->getMessage());
             }
 
