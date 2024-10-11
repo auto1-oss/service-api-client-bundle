@@ -12,7 +12,7 @@ use Auto1\ServiceAPIClientBundle\DependencyInjection\CompilerPass\RequestVisitor
  */
 class Auto1ServiceAPIClientBundle extends Bundle
 {
-    public function build(ContainerBuilder $container)
+    public function build(ContainerBuilder $container): void
     {
         parent::build($container);
 
