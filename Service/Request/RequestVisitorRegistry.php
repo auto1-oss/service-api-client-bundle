@@ -26,7 +26,7 @@ class RequestVisitorRegistry implements RequestVisitorRegistryInterface
      *
      * @return $this
      */
-    public function registerRequestVisitor(RequestVisitorInterface $requestVisitor, string $requestFormat = null): self
+    public function registerRequestVisitor(RequestVisitorInterface $requestVisitor, ?string $requestFormat = null): self
     {
         if (!$requestFormat) {
             $this->requestVisitorsCommon[] = $requestVisitor;
