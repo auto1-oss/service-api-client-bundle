@@ -4,20 +4,26 @@ namespace Auto1\ServiceAPIClientBundle\Service;
 
 use Auto1\ServiceAPIClientBundle\Service\Request\RequestFactoryInterface;
 use Auto1\ServiceAPIClientBundle\Service\Response\ResponseTransformerInterface;
-use Auto1\ServiceAPIComponentsBundle\Service\Logger\LoggerAwareTrait;
 use Auto1\ServiceAPIRequest\ServiceRequestInterface;
 use Http\Client\Exception\HttpException;
 use Http\Client\HttpAsyncClient;
 use Http\Promise\RejectedPromise;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Log\LogLevel;
 
 /**
  * Class APIAsyncClient.
  */
 class APIAsyncClient implements APIAsyncClientInterface
 {
-    use LoggerAwareTrait;
+    /**
+     * @var RequestTimer
+     */
+    private $requestTimer;
+
+    /**
+     * @var ClientLoggerRegistry
+     */
+    private $clientLoggerRegistry;
 
     /**
      * @var RequestFactoryInterface
@@ -35,28 +41,26 @@ class APIAsyncClient implements APIAsyncClientInterface
     private $client;
 
     /**
-     * @var string
-     */
-    private $requestTimeLogLevel;
-
-    /**
      * APIAsyncClient constructor.
      *
+     * @param RequestTimer                 $requestTimer
+     * @param ClientLoggerRegistry         $clientLoggerRegistry
      * @param RequestFactoryInterface      $requestFactory
      * @param ResponseTransformerInterface $responseTransformer
      * @param HttpAsyncClient              $client
-     * @param string                       $requestTimeLogLevel
      */
     public function __construct(
+        RequestTimer $requestTimer,
+        ClientLoggerRegistry $clientLoggerRegistry,
         RequestFactoryInterface $requestFactory,
         ResponseTransformerInterface $responseTransformer,
-        HttpAsyncClient $client,
-        string $requestTimeLogLevel = LogLevel::DEBUG
+        HttpAsyncClient $client
     ) {
+        $this->requestTimer = $requestTimer;
+        $this->clientLoggerRegistry = $clientLoggerRegistry;
         $this->requestFactory = $requestFactory;
         $this->responseTransformer = $responseTransformer;
         $this->client = $client;
-        $this->requestTimeLogLevel = $requestTimeLogLevel;
     }
 
     /**
@@ -65,19 +69,15 @@ class APIAsyncClient implements APIAsyncClientInterface
     public function sendAsync(ServiceRequestInterface $serviceRequest)
     {
         $request = $this->requestFactory->create($serviceRequest);
-        $startTime = \microtime(true);
+
+        $this->requestTimer->from($request);
+        $this->clientLoggerRegistry->logRequest($serviceRequest, $request);
 
         return $this->client->sendAsyncRequest($request)->then(
-            function (ResponseInterface $response) use ($serviceRequest, $request, $startTime) {
-                $this->getLogger()->log(
-                    $this->requestTimeLogLevel,
-                    'HttpClient request time (ms)',
-                    [
-                        'requestPath' => $request->getUri()->getPath(),
-                        'requestTime' => \round(\microtime(true) - $startTime, 3) * 1000,
-                        'requestHeaders' => $request->getHeaders(),
-                    ]
-                );
+            function (ResponseInterface $response) use ($serviceRequest, $request) {
+                $duration = $this->requestTimer->to($request);
+                $this->clientLoggerRegistry->logResponse($serviceRequest, $request, $response, $duration);
+
                 try {
                     return $this->responseTransformer->transform($response, $serviceRequest);
                 } catch (\Throwable $throwable) {
