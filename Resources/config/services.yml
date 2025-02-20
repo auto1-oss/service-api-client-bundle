@@ -89,6 +89,8 @@ services:
         class: Auto1\ServiceAPIClientBundle\Service\ClientLogger\PsrClientLogger
         arguments:
             - '@logger'
+        tags:
+            - 'auto1.api.client_logger'
 
     auto1.api.request_timer:
         class: Auto1\ServiceAPIClientBundle\Service\RequestTimer
@@ -97,8 +99,6 @@ services:
 
     auto1.api.client_logger.registry:
         class: Auto1\ServiceAPIClientBundle\Service\ClientLoggerRegistry
-        arguments:
-            - !tagged_iterator auto1.api.client_loggers
 
     auto1.api.client.service:
         class: Auto1\ServiceAPIClientBundle\Service\APIClient

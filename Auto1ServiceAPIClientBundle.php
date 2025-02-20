@@ -2,8 +2,8 @@
 
 namespace Auto1\ServiceAPIClientBundle;
 
+use Auto1\ServiceAPIClientBundle\DependencyInjection\CompilerPass\ClientLoggerCompilerPass;
 use Auto1\ServiceAPIClientBundle\DependencyInjection\CompilerPass\RequestVisitorCompilerPass;
-use Auto1\ServiceAPIClientBundle\Service\ClientLogger\ClientLoggerInterface;
 use Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategyInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
@@ -17,12 +17,11 @@ class Auto1ServiceAPIClientBundle extends Bundle
     {
         parent::build($container);
 
-        $container->addCompilerPass(new RequestVisitorCompilerPass());
+        $container
+            ->addCompilerPass(new ClientLoggerCompilerPass())
+            ->addCompilerPass(new RequestVisitorCompilerPass());
 
         $container->registerForAutoconfiguration(ResponseTransformerStrategyInterface::class)
             ->addTag('response.transformer.strategies');
-
-        $container->registerForAutoconfiguration(ClientLoggerInterface::class)
-            ->addTag('auto1.api.client_loggers');
     }
 }

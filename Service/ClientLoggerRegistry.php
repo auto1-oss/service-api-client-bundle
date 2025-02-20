@@ -9,20 +9,16 @@ use Auto1\ServiceAPIRequest\ServiceRequestInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
-class ClientLoggerRegistry
+class ClientLoggerRegistry implements ClientLoggerInterface
 {
     /**
      * @var ClientLoggerInterface[]
      */
-    private $loggers;
+    private $loggers = [];
 
-    /**
-     * @param ClientLoggerInterface[] $clientLoggers
-     */
-    public function __construct(
-        iterable $clientLoggers = []
-    ) {
-        $this->loggers = $clientLoggers;
+    public function registerLogger(ClientLoggerInterface $logger): void
+    {
+        $this->loggers[] = $logger;
     }
 
     public function logRequest(ServiceRequestInterface $serviceRequest, RequestInterface $request): void
