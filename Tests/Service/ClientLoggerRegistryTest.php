@@ -18,6 +18,7 @@ class ClientLoggerRegistryTest extends TestCase
         $serviceRequest = $this->createMock(ServiceRequestInterface::class);
         $request = $this->createMock(RequestInterface::class);
 
+        $registry = new ClientLoggerRegistry();
         $loggers = [
             $this->createMock(ClientLoggerInterface::class),
             $this->createMock(ClientLoggerInterface::class),
@@ -25,13 +26,13 @@ class ClientLoggerRegistryTest extends TestCase
         ];
 
         foreach ($loggers as $logger) {
+            $registry->registerLogger($logger);
             $logger
                 ->expects(self::once())
                 ->method('logRequest')
                 ->with($serviceRequest, $request);
         }
 
-        $registry = new ClientLoggerRegistry($loggers);
         $registry->logRequest($serviceRequest, $request);
     }
 
@@ -41,6 +42,7 @@ class ClientLoggerRegistryTest extends TestCase
         $request = $this->createMock(RequestInterface::class);
         $response = $this->createMock(ResponseInterface::class);
 
+        $registry = new ClientLoggerRegistry();
         $loggers = [
             $this->createMock(ClientLoggerInterface::class),
             $this->createMock(ClientLoggerInterface::class),
@@ -50,13 +52,13 @@ class ClientLoggerRegistryTest extends TestCase
         $expectedDuration = 123;
 
         foreach ($loggers as $logger) {
+            $registry->registerLogger($logger);
             $logger
                 ->expects(self::once())
                 ->method('logResponse')
                 ->with($serviceRequest, $request, $response, $expectedDuration);
         }
 
-        $registry = new ClientLoggerRegistry($loggers);
         $registry->logResponse($serviceRequest, $request, $response, $expectedDuration);
     }
 }

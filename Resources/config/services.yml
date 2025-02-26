@@ -89,6 +89,7 @@ services:
         class: Auto1\ServiceAPIClientBundle\Service\ClientLogger\PsrClientLogger
         arguments:
             - '@logger'
+            - '%auto1_service_api_client.request_time_log_level%'
         tags:
             - 'auto1.api.client_logger'
 

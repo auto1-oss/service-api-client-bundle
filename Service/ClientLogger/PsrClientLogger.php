@@ -18,31 +18,39 @@ class PsrClientLogger implements ClientLoggerInterface
     private $logger;
 
     /**
+     * @var string One of LogLevel::* constants
+     */
+    private $requestTimeLogLevel;
+
+    /**
      * @param LoggerInterface $logger
      */
-    public function __construct(LoggerInterface $logger)
-    {
+    public function __construct(
+        LoggerInterface $logger,
+        string $requestTimeLogLevel = LogLevel::DEBUG
+    ) {
         $this->logger = $logger;
+        $this->requestTimeLogLevel = $requestTimeLogLevel;
     }
 
     public function logRequest(ServiceRequestInterface $serviceRequest, RequestInterface $request): void
     {
     }
 
-    public function logResponse(ServiceRequestInterface $serviceRequest, RequestInterface $request, ResponseInterface $response, int $durationInMs): void
-    {
+    public function logResponse(
+        ServiceRequestInterface $serviceRequest,
+        RequestInterface $request,
+        ResponseInterface $response,
+        int $durationInMs
+    ): void {
         $this->logger->log(
-            $this->selectLogLevel($response, $durationInMs),
+            $this->requestTimeLogLevel,
             'HttpClient request time (ms)',
             [
+                'requestClass' => get_class($serviceRequest),
                 'requestPath' => $request->getUri()->getPath(),
                 'requestTime' => $durationInMs,
             ],
         );
-    }
-
-    private function selectLogLevel(ResponseInterface $response, int $durationInMs): string
-    {
-        return LogLevel::DEBUG; // @todo mcz
     }
 }

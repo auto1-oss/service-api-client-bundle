@@ -12,5 +12,10 @@ interface ClientLoggerInterface
 {
     public function logRequest(ServiceRequestInterface $serviceRequest, RequestInterface $request): void;
 
-    public function logResponse(ServiceRequestInterface $serviceRequest, RequestInterface $request, ResponseInterface $response, int $durationInMs): void;
+    public function logResponse(
+        ServiceRequestInterface $serviceRequest,
+        RequestInterface $request,
+        ResponseInterface $response,
+        int $durationInMs
+    ): void;
 }

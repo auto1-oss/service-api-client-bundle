@@ -31,7 +31,13 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
+                ->scalarNode('request_time_log_level')->defaultValue(LogLevel::DEBUG)->end()
+            ->end()
+            ->children()
                 ->booleanNode('strict_mode')->defaultValue(false)->end()
+            ->end()
+            ->children()
+                ->booleanNode('enable_default_logger')->defaultValue(true)->end()
             ->end()
             ->children()
                 ->arrayNode('request_visitors')
