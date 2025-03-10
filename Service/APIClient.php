@@ -2,20 +2,26 @@
 
 namespace Auto1\ServiceAPIClientBundle\Service;
 
-use Auto1\ServiceAPIComponentsBundle\Service\Logger\LoggerAwareTrait;
-use Http\Client\Common\BatchClient;
-use Http\Client\HttpClient;
 use Auto1\ServiceAPIClientBundle\Service\Request\RequestFactoryInterface;
 use Auto1\ServiceAPIClientBundle\Service\Response\ResponseTransformerInterface;
 use Auto1\ServiceAPIRequest\ServiceRequestInterface;
-use Psr\Log\LogLevel;
+use Http\Client\Common\BatchClient;
+use Http\Client\HttpClient;
 
 /**
  * Class APIClient.
  */
 class APIClient implements APIClientInterface
 {
-    use LoggerAwareTrait;
+    /**
+     * @var RequestTimer
+     */
+    private $requestTimer;
+
+    /**
+     * @var ClientLoggerRegistry
+     */
+    private $clientLoggerRegistry;
 
     /**
      * @var RequestFactoryInterface
@@ -33,28 +39,26 @@ class APIClient implements APIClientInterface
     private $client;
 
     /**
-     * @var string
-     */
-    private $requestTimeLogLevel;
-
-    /**
      * APIClient constructor.
      *
+     * @param RequestTimer                 $requestTimer
+     * @param ClientLoggerRegistry         $clientLoggerRegistry
      * @param RequestFactoryInterface      $requestFactory
      * @param ResponseTransformerInterface $responseTransformer
      * @param HttpClient                   $client
-     * @param string                       $requestTimeLogLevel
      */
     public function __construct(
+        RequestTimer $requestTimer,
+        ClientLoggerRegistry $clientLoggerRegistry,
         RequestFactoryInterface $requestFactory,
         ResponseTransformerInterface $responseTransformer,
-        HttpClient $client,
-        string $requestTimeLogLevel = LogLevel::DEBUG
+        HttpClient $client
     ) {
+        $this->requestTimer = $requestTimer;
+        $this->clientLoggerRegistry = $clientLoggerRegistry;
         $this->requestFactory = $requestFactory;
         $this->responseTransformer = $responseTransformer;
         $this->client = $client;
-        $this->requestTimeLogLevel = $requestTimeLogLevel;
     }
 
     /**
@@ -64,16 +68,13 @@ class APIClient implements APIClientInterface
     {
         $request = $this->requestFactory->create($serviceRequest);
 
-        $startTime = \microtime(true);
+        $this->requestTimer->from($request);
+        $this->clientLoggerRegistry->logRequest($serviceRequest, $request);
+
         $response = $this->client->sendRequest($request);
-        $this->getLogger()->log(
-            $this->requestTimeLogLevel,
-            'HttpClient request time (ms)',
-            [
-                'requestPath' => $request->getUri()->getPath(),
-                'requestTime' => \round(\microtime(true) - $startTime, 3) * 1000,
-            ]
-        );
+
+        $duration = $this->requestTimer->to($request);
+        $this->clientLoggerRegistry->logResponse($serviceRequest, $request, $response, $duration);
 
         return $this->responseTransformer->transform($response, $serviceRequest);
     }
@@ -91,8 +92,10 @@ class APIClient implements APIClientInterface
         $batchClient = new BatchClient($this->client);
 
         $httpRequests = [];
-        foreach ($serviceRequests as $serviceRequest) {
-            $httpRequests[] = $this->requestFactory->create($serviceRequest);
+        foreach ($serviceRequests as $key => $serviceRequest) {
+            $httpRequests[$key] = $request = $this->requestFactory->create($serviceRequest);
+            $this->requestTimer->from($request);
+            $this->clientLoggerRegistry->logRequest($serviceRequest, $request);
         }
 
         $responses = $batchClient->sendRequests($httpRequests)->getResponses();
@@ -100,6 +103,10 @@ class APIClient implements APIClientInterface
         $objects = [];
         foreach ($responses as $key => $response) {
             $serviceRequest = $serviceRequests[$key];
+            $httpRequest = $httpRequests[$key];
+
+            $duration = $this->requestTimer->to($httpRequest);
+            $this->clientLoggerRegistry->logResponse($serviceRequest, $httpRequest, $response, $duration);
             $objects[] = $this->responseTransformer->transform($response, $serviceRequest);
         }
 

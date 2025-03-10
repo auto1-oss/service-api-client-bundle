@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Auto1\ServiceAPIClientBundle\Tests\Service;
 
 use Auto1\ServiceAPIClientBundle\Service\APIAsyncClient;
+use Auto1\ServiceAPIClientBundle\Service\ClientLoggerRegistry;
 use Auto1\ServiceAPIClientBundle\Service\Request\RequestFactoryInterface;
+use Auto1\ServiceAPIClientBundle\Service\RequestTimer;
 use Auto1\ServiceAPIClientBundle\Service\Response\ResponseTransformerInterface;
 use Auto1\ServiceAPIRequest\ServiceRequestInterface;
 use Http\Client\HttpAsyncClient;
@@ -21,6 +23,16 @@ use Psr\Http\Message\UriInterface;
  */
 class APIAsyncClientTest extends TestCase
 {
+    /**
+     * @var RequestTimer|ObjectProphecy
+     */
+    private $requestTimer;
+
+    /**
+     * @var ClientLoggerRegistry|ObjectProphecy
+     */
+    private $clientLoggerRegistry;
+
     /**
      * @var RequestFactoryInterface|ObjectProphecy
      */
@@ -41,6 +53,8 @@ class APIAsyncClientTest extends TestCase
      */
     protected function setUp(): void
     {
+        $this->requestTimer = $this->prophesize(RequestTimer::class);
+        $this->clientLoggerRegistry = $this->prophesize(ClientLoggerRegistry::class);
         $this->requestFactoryProphecy = $this->prophesize(RequestFactoryInterface::class);
         $this->responseTransformerProphecy = $this->prophesize(ResponseTransformerInterface::class);
         $this->clientProphecy = $this->prophesize(HttpAsyncClient::class);
@@ -60,25 +74,42 @@ class APIAsyncClientTest extends TestCase
         /** @var ServiceRequestInterface $serviceRequest */
         $serviceRequest = $this->prophesize(ServiceRequestInterface::class)->reveal();
 
+        $this->requestTimer
+            ->from($request)
+            ->shouldBeCalled();
+
+        $this->requestTimer
+            ->to($request)
+            ->willReturn($duration = 567)
+            ->shouldBeCalled();
+
+        $this->clientLoggerRegistry
+            ->logRequest($serviceRequest, $request)
+            ->shouldBeCalled();
+
+        $this->clientLoggerRegistry
+            ->logResponse($serviceRequest, $request, $response, $duration)
+            ->shouldBeCalled();
+
         $this->requestFactoryProphecy
             ->create($serviceRequest)
             ->willReturn($request)
-            ->shouldBeCalled()
-        ;
+            ->shouldBeCalled();
 
         $promise = new FulfilledPromise($response);
         $this->clientProphecy
             ->sendAsyncRequest($request)
             ->willReturn($promise)
-            ->shouldBeCalled()
-        ;
+            ->shouldBeCalled();
+
         $this->responseTransformerProphecy
             ->transform($response, $serviceRequest)
             ->willReturn($object)
-            ->shouldBeCalled()
-        ;
+            ->shouldBeCalled();
 
         $apiClient = new APIAsyncClient(
+            $this->requestTimer->reveal(),
+            $this->clientLoggerRegistry->reveal(),
             $this->requestFactoryProphecy->reveal(),
             $this->responseTransformerProphecy->reveal(),
             $this->clientProphecy->reveal()

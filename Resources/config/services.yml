@@ -85,25 +85,39 @@ services:
         calls:
             - [setLogger, ['@logger']]
 
+    auto1.api.client_logger.psr:
+        class: Auto1\ServiceAPIClientBundle\Service\ClientLogger\PsrClientLogger
+        arguments:
+            - '@logger'
+            - '%auto1_service_api_client.request_time_log_level%'
+        tags:
+            - 'auto1.api.client_logger'
+
+    auto1.api.request_timer:
+        class: Auto1\ServiceAPIClientBundle\Service\RequestTimer
+        calls:
+            - [ setLogger, [ '@logger' ] ]
+
+    auto1.api.client_logger.registry:
+        class: Auto1\ServiceAPIClientBundle\Service\ClientLoggerRegistry
+
     auto1.api.client.service:
         class: Auto1\ServiceAPIClientBundle\Service\APIClient
         arguments:
+            - '@auto1.api.request_timer'
+            - '@auto1.api.client_logger.registry'
             - '@auto1.api.request.factory'
             - '@auto1.api.response.transformer'
             - '@auto1.api.http_client'
-            - '%auto1_service_api_client.request_time_log_level%'
-        calls:
-            - [setLogger, ['@logger']]
 
     auto1.api.async_client.service:
         class: Auto1\ServiceAPIClientBundle\Service\APIAsyncClient
         arguments:
+            - '@auto1.api.request_timer'
+            - '@auto1.api.client_logger.registry'
             - '@auto1.api.request.factory'
             - '@auto1.api.response.transformer'
             - '@auto1.api.http_async_client'
-            - '%auto1_service_api_client.request_time_log_level%'
-        calls:
-            - [setLogger, ['@logger']]
 
     auto1.api.symfony.deserializer:
         autowire: true
