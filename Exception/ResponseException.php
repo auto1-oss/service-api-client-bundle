@@ -19,7 +19,7 @@ class ResponseException extends AbstractException
      * @param string|null $message
      * @param Throwable|null $previous
      */
-    public function __construct(ErrorResponse $errorDto = null, $code = 0, $message = null, Throwable $previous = null)
+    public function __construct(?ErrorResponse $errorDto = null, $code = 0, $message = null, ?Throwable $previous = null)
     {
         if ($message === null) {
             $message = $errorDto
