@@ -22,7 +22,7 @@ class ServiceUnavailableResponseException extends ResponseException
     public function __construct(
         ErrorResponse $errorResponse,
         string $message = '',
-        Throwable $previous = null
+        ?Throwable $previous = null
     ) {
         $this->errorResponse = $errorResponse;
         parent::__construct(

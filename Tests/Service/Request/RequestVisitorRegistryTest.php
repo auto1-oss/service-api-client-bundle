@@ -32,7 +32,7 @@ class RequestVisitorRegistryTest extends TestCase
      */
     public function testRequestVisitorRegistry(
         array $callArgumentsList,
-        string $format = null,
+        ?string $format,
         array $expected
     ) {
         $requestVisitorRegistry = new RequestVisitorRegistry();

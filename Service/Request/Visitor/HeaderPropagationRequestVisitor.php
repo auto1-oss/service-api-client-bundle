@@ -33,7 +33,7 @@ class HeaderPropagationRequestVisitor implements RequestVisitorInterface
      * @param Request|null  $previousRequest
      * @param string[]|null $headerNamesToPropagate
      */
-    public function __construct(Request $previousRequest = null, array $headerNamesToPropagate = null)
+    public function __construct(?Request $previousRequest = null, ?array $headerNamesToPropagate = null)
     {
         $this->previousRequest = $previousRequest;
         $this->headerNamesToPropagate = $headerNamesToPropagate;

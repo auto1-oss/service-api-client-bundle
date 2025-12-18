@@ -25,7 +25,7 @@ class DeserializableResponseException extends ResponseException
         DeserializerInterface $deserializer,
         ErrorResponse         $errorResponse,
         string                $message = '',
-        Throwable             $previous = null
+        ?Throwable            $previous = null
     ) {
         $this->errorResponse = $errorResponse;
         $this->deserializer = $deserializer;
