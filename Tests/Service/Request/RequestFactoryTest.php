@@ -422,4 +422,226 @@ class RequestFactoryTest extends TestCase
 
         $this->assertInstanceOf(RequestInterface::class, $requestBuilder->create($serviceRequest));
     }
+
+    /**
+     * @dataProvider arrayQueryParamProvider
+     *
+     * @return void
+     */
+    public function testBuildFlowWithArrayQueryParams(
+        string $routeString,
+        array $categoriesValue,
+        string $expectedUri
+    ): void {
+        $baseUrl = 'baseUrl';
+        $requestMethod = 'GET';
+        $requestBody = '';
+
+        $endpointProphecy = $this->prophesize(EndpointInterface::class);
+        $endpointProphecy
+            ->getBaseUrl()
+            ->willReturn($baseUrl)
+            ->shouldBeCalled()
+        ;
+        $endpointProphecy
+            ->getPath()
+            ->willReturn($routeString)
+            ->shouldBeCalled()
+        ;
+        $endpointProphecy
+            ->getMethod()
+            ->willReturn($requestMethod)
+            ->shouldBeCalled()
+        ;
+        $endpointProphecy
+            ->getRequestFormat()
+            ->willReturn(EndpointInterface::FORMAT_JSON)
+            ->shouldBeCalled()
+        ;
+        $endpoint = $endpointProphecy->reveal();
+
+        $uri = $this->prophesize(UriInterface::class)->reveal();
+        $request = $this->prophesize(RequestInterface::class)->reveal();
+
+        $serviceRequest = $this->getMockBuilder(ServiceRequestInterface::class)
+            ->addMethods(['getCategories', 'getLimit'])
+            ->getMock();
+
+        $serviceRequest
+            ->method('getCategories')
+            ->willReturn($categoriesValue);
+
+        $serviceRequest
+            ->method('getLimit')
+            ->willReturn(10);
+
+        $this->endpointRegistryProphecy
+            ->getEndpoint($serviceRequest)
+            ->willReturn($endpoint)
+            ->shouldBeCalled()
+        ;
+
+        $this->serializerProphecy
+            ->serialize($serviceRequest, EndpointInterface::FORMAT_JSON)
+            ->willReturn($requestBody)
+            ->shouldBeCalled()
+        ;
+
+        $this->uriFactoryProphecy
+            ->createUri($expectedUri)
+            ->willReturn($uri)
+            ->shouldBeCalled()
+        ;
+
+        $this->messageFactoryProphecy
+            ->createRequest(
+                $requestMethod,
+                $uri,
+                [],
+                $requestBody,
+            )
+            ->willReturn($request)
+            ->shouldBeCalled()
+        ;
+
+        $this->requestVisitorRegistryProphecy
+            ->getRegisteredRequestVisitors(EndpointInterface::FORMAT_JSON)
+            ->willReturn([])
+            ->shouldBeCalled()
+        ;
+
+        $requestBuilder = new RequestFactory(
+            $this->endpointRegistryProphecy->reveal(),
+            $this->serializerProphecy->reveal(),
+            $this->requestVisitorRegistryProphecy->reveal(),
+            $this->uriFactoryProphecy->reveal(),
+            $this->messageFactoryProphecy->reveal(),
+            false
+        );
+
+        $this->assertInstanceOf(RequestInterface::class, $requestBuilder->create($serviceRequest));
+    }
+
+    /**
+     * @return array
+     */
+    public function arrayQueryParamProvider(): array
+    {
+        return [
+            'array value expands to bracket syntax' => [
+                '/routeString?categories={categories}&limit={limit}',
+                ['retail', 'wkda'],
+                'baseUrl/routeString?categories%5B0%5D=retail&categories%5B1%5D=wkda&limit=10',
+            ],
+            'array value is urlencoded' => [
+                '/routeString?categories={categories}&limit={limit}',
+                ['value with whitespaces'],
+                'baseUrl/routeString?categories%5B0%5D=value+with+whitespaces&limit=10',
+            ],
+            'empty array parameter is dropped' => [
+                '/routeString?categories={categories}&limit={limit}',
+                [],
+                'baseUrl/routeString?limit=10',
+            ],
+            'empty array parameter in the middle is dropped' => [
+                '/routeString?limit={limit}&categories={categories}&second-param=predefined',
+                [],
+                'baseUrl/routeString?limit=10&second-param=predefined',
+            ],
+        ];
+    }
+
+    /**
+     * @return void
+     */
+    public function testBuildFlowWithOnlyEmptyArrayQueryParam(): void
+    {
+        $baseUrl = 'baseUrl';
+        $routeString = '/routeString?categories={categories}';
+        $requestMethod = 'GET';
+        $requestBody = '';
+
+        $expectedUri = 'baseUrl/routeString';
+
+        $endpointProphecy = $this->prophesize(EndpointInterface::class);
+        $endpointProphecy
+            ->getBaseUrl()
+            ->willReturn($baseUrl)
+            ->shouldBeCalled()
+        ;
+        $endpointProphecy
+            ->getPath()
+            ->willReturn($routeString)
+            ->shouldBeCalled()
+        ;
+        $endpointProphecy
+            ->getMethod()
+            ->willReturn($requestMethod)
+            ->shouldBeCalled()
+        ;
+        $endpointProphecy
+            ->getRequestFormat()
+            ->willReturn(EndpointInterface::FORMAT_JSON)
+            ->shouldBeCalled()
+        ;
+        $endpoint = $endpointProphecy->reveal();
+
+        $uri = $this->prophesize(UriInterface::class)->reveal();
+        $request = $this->prophesize(RequestInterface::class)->reveal();
+
+        $serviceRequest = $this->getMockBuilder(ServiceRequestInterface::class)
+            ->addMethods(['getCategories'])
+            ->getMock();
+
+        $serviceRequest
+            ->expects($this->once())
+            ->method('getCategories')
+            ->willReturn([]);
+
+        $this->endpointRegistryProphecy
+            ->getEndpoint($serviceRequest)
+            ->willReturn($endpoint)
+            ->shouldBeCalled()
+        ;
+
+        $this->serializerProphecy
+            ->serialize($serviceRequest, EndpointInterface::FORMAT_JSON)
+            ->willReturn($requestBody)
+            ->shouldBeCalled()
+        ;
+
+        $this->uriFactoryProphecy
+            ->createUri($expectedUri)
+            ->willReturn($uri)
+            ->shouldBeCalled()
+        ;
+
+        $this->messageFactoryProphecy
+            ->createRequest(
+                $requestMethod,
+                $uri,
+                [],
+                $requestBody,
+            )
+            ->willReturn($request)
+            ->shouldBeCalled()
+        ;
+
+        $this->requestVisitorRegistryProphecy
+            ->getRegisteredRequestVisitors(EndpointInterface::FORMAT_JSON)
+            ->willReturn([])
+            ->shouldBeCalled()
+        ;
+
+        $requestBuilder = new RequestFactory(
+            $this->endpointRegistryProphecy->reveal(),
+            $this->serializerProphecy->reveal(),
+            $this->requestVisitorRegistryProphecy->reveal(),
+            $this->uriFactoryProphecy->reveal(),
+            $this->messageFactoryProphecy->reveal(),
+            false
+        );
+
+        $this->assertInstanceOf(RequestInterface::class, $requestBuilder->create($serviceRequest));
+    }
 }
