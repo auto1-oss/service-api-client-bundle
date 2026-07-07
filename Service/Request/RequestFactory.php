@@ -150,9 +150,22 @@ class RequestFactory implements RequestFactoryInterface, LoggerAwareInterface
                 throw new InvalidArgumentException($message, $errorCode);
             }
             $value = $serviceRequest->$getterMethod();
-            $value = array_key_exists($property, $queryParams) ? urlencode((string)$value) : $value;
+            if (array_key_exists($property, $queryParams)) {
+                if (is_array($value)) {
+                    $paramName = $queryParams[$property];
+                    $path = str_replace(
+                        $paramName.'='.$placeholder,
+                        http_build_query([$paramName => $value]),
+                        $path
+                    );
+                    continue;
+                }
+                $value = urlencode((string)$value);
+            }
             $path = str_replace($placeholder, $value, $path);
         }
+
+        $path = $this->normalizeQueryString($path);
 
         if (!$this->validateEndpointPath($path)) {
             $message = 'Invalid request path';
@@ -198,6 +211,21 @@ class RequestFactory implements RequestFactoryInterface, LoggerAwareInterface
         $pathContainsEmptyFolders = preg_match('/\/\//', $path);
 
         return !$pathContainsUnmappedArguments && !$pathContainsEmptyFolders;
+    }
+
+    /**
+     * Removes query string separator artifacts left behind when empty array parameters are dropped
+     *
+     * @param string $path
+     *
+     * @return string
+     */
+    private function normalizeQueryString(string $path): string
+    {
+        $path = (string)preg_replace('/&{2,}/', '&', $path);
+        $path = str_replace('?&', '?', $path);
+
+        return rtrim($path, '?&');
     }
 
     /**
