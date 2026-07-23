@@ -13,7 +13,6 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
 use Psr\Http\Message\RequestInterface;
-use Symfony\Component\HttpFoundation\HeaderBag;
 use Auto1\ServiceAPIClientBundle\Service\Request\Visitor\HeaderPropagationRequestVisitor;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -28,11 +27,6 @@ class HeaderPropagationRequestVisitorTest extends TestCase
     private $requestProphecy;
 
     /**
-     * @var HeaderBag|ObjectProphecy
-     */
-    private $headerBagProphecy;
-
-    /**
      * @var Request
      */
     private $previousRequest;
@@ -44,7 +38,6 @@ class HeaderPropagationRequestVisitorTest extends TestCase
     {
         $this->previousRequest = new Request();
         $this->requestProphecy = $this->prophesize(RequestInterface::class);
-        $this->headerBagProphecy = $this->prophesize(HeaderBag::class);
     }
 
     public function testDecorate()
@@ -55,19 +48,11 @@ class HeaderPropagationRequestVisitorTest extends TestCase
         ];
         $timesShouldBeCalled = \count($headerNamesArray);
 
-        $this->headerBagProphecy
-            ->has(Argument::type('string'))
-            ->shouldBeCalledTimes($timesShouldBeCalled)
-            ->willReturn(true)
-        ;
-        $this->headerBagProphecy
-            ->get(Argument::type('string'))
-            ->shouldBeCalledTimes($timesShouldBeCalled)
-            ->willReturn('someHeaderValue')
-        ;
-        /** @var HeaderBag $headerBag */
-        $headerBag = $this->headerBagProphecy->reveal();
-        $this->previousRequest->headers = $headerBag;
+        // Populate the request's real HeaderBag instead of replacing the `headers`
+        // property (assigning it directly is deprecated as of Symfony 7 / removed later).
+        foreach ($headerNamesArray as $headerName) {
+            $this->previousRequest->headers->set($headerName, 'someHeaderValue');
+        }
 
         $this->requestProphecy
             ->withHeader(Argument::type('string'), Argument::type('string'))
