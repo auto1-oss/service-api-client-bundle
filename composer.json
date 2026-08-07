@@ -15,7 +15,7 @@
     ],
     "require": {
         "php": "^7.4|^8.0",
-        "auto1-oss/service-api-components-bundle": "^1.0",
+        "auto1-oss/service-api-components-bundle": "dev-support-multiform-data",
         "auto1-oss/service-api-request": "^1.0",
         "symfony/serializer": "~5.0|~6.0|~7.0|~8.0",
         "symfony/dependency-injection": "~5.0|~6.0|~7.0|~8.0",
@@ -23,10 +23,12 @@
         "symfony/http-foundation": "~5.0|~6.0|~7.0|~8.0",
         "symfony/http-kernel": "~5.0|~6.0|~7.0|~8.0",
         "symfony/yaml": "~5.0|~6.0|~7.0|~8.0",
+        "symfony/property-access": "~5.0|~6.0|~7.0|~8.0",
         "php-http/client-common": "^2.3",
         "php-http/discovery": "^1.7",
         "php-http/httplug": "^2.2",
         "php-http/promise": "^1.1",
+        "php-http/multipart-stream-builder": "^1.1",
         "psr/http-message": "^1.0|^2.0",
         "psr/http-factory": "^1.0",
         "psr/log": "^1.1|^2.0|^3.0"
@@ -35,7 +37,9 @@
         "symfony/console": "~5.0|~6.0|~7.0|~8.0",
         "phpunit/phpunit": "^8.5",
         "symfony/phpunit-bridge": "^5.0|^6.0|^7.0|^8.0",
-        "phpspec/prophecy": "^1.7.2"
+        "phpspec/prophecy": "^1.7.2",
+        "nyholm/psr7": "^1.8",
+        "symfony/framework-bundle": "~5.0|~6.0|~7.0|~8.0"
     },
     "autoload": {
         "psr-4": { "Auto1\\ServiceAPIClientBundle\\": "" }
@@ -44,5 +48,11 @@
         "allow-plugins": {
             "php-http/discovery": false
         }
-    }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:aviator-ua/service-api-components-bundle.git"
+        }
+    ]
 }

@@ -10,6 +10,7 @@
 namespace Auto1\ServiceAPIClientBundle;
 
 use Auto1\ServiceAPIClientBundle\DependencyInjection\CompilerPass\ClientLoggerCompilerPass;
+use Auto1\ServiceAPIClientBundle\DependencyInjection\CompilerPass\LoggerFallbackCompilerPass;
 use Auto1\ServiceAPIClientBundle\DependencyInjection\CompilerPass\RequestVisitorCompilerPass;
 use Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategyInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -25,6 +26,7 @@ class Auto1ServiceAPIClientBundle extends Bundle
         parent::build($container);
 
         $container
+            ->addCompilerPass(new LoggerFallbackCompilerPass())
             ->addCompilerPass(new ClientLoggerCompilerPass())
             ->addCompilerPass(new RequestVisitorCompilerPass());
 

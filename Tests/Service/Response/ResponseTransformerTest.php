@@ -141,7 +141,7 @@ class ResponseTransformerTest extends TestCase
         $responseTransformer->transform($response->reveal(), $serviceRequest->reveal());
     }
 
-    private function transformFailsDataProvider(): \Generator
+    public function transformFailsDataProvider(): \Generator
     {
         $reasonPhrase = Response::$statusTexts[Response::HTTP_INTERNAL_SERVER_ERROR];
         yield Response::HTTP_INTERNAL_SERVER_ERROR => [

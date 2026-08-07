@@ -9,6 +9,7 @@
 */
 namespace Auto1\ServiceAPIClientBundle\DependencyInjection;
 
+use Auto1\ServiceAPIComponentsBundle\Service\Endpoint\EndpointInterface;
 use Psr\Log\LogLevel;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -57,6 +58,14 @@ class Configuration implements ConfigurationInterface
                         [
                             self::KEY_SERVICE => 'auto1.api.request.visitor.content_type.file',
                             self::KEY_FORMAT => 'stream',
+                        ],
+                        [
+                            self::KEY_SERVICE => 'auto1.api.request.visitor.content_type.multipart',
+                            self::KEY_FORMAT => EndpointInterface::FORMAT_MULTIPART,
+                        ],
+                        [
+                            self::KEY_SERVICE => 'auto1.api.request.visitor.accept.json',
+                            self::KEY_FORMAT => EndpointInterface::FORMAT_MULTIPART,
                         ],
                         [
                             self::KEY_SERVICE => 'auto1.api.request.visitor.content_type.url',

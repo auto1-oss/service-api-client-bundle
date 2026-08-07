@@ -1,5 +1,14 @@
 services:
 
+    # Bundle-local logger reference. Defaults to a NullLogger so the bundle still
+    # compiles in an application without a `logger` service (e.g. no MonologBundle).
+    # LoggerFallbackCompilerPass re-aliases this to `@logger` when that service exists.
+    auto1.api.logger.null:
+        class: Psr\Log\NullLogger
+
+    auto1.api.logger:
+        alias: auto1.api.logger.null
+
     Auto1\ServiceAPIClientBundle\Service\ResponseTransformerStrategy\:
         autowire: true
         autoconfigure: true
@@ -15,7 +24,7 @@ services:
             - '@auto1.api.endpoint.registry'
             - '@auto1.api.response.serializer'
         calls:
-            - [setLogger, ['@logger']]
+            - [setLogger, ['@auto1.api.logger']]
 
     auto1.api.response.strategy.transformer:
         class: Auto1\ServiceAPIClientBundle\Service\Response\ResponseStrategyTransformer
@@ -27,6 +36,43 @@ services:
 
     auto1.api.request.visitor.content_type.file:
         class: Auto1\ServiceAPIClientBundle\Service\Request\Visitor\FileContentTypeRequestVisitor
+
+    auto1.api.request.visitor.content_type.multipart:
+        class: Auto1\ServiceAPIClientBundle\Service\Request\Visitor\MultipartContentTypeRequestVisitor
+
+    auto1.api.request.multipart_stream_factory:
+        class: Auto1\ServiceAPIClientBundle\Service\Request\Multipart\MultipartStreamFactory
+        arguments:
+            - '@auto1.api.stream_factory'
+            - '@auto1.api.request.serializer'
+            - '@serializer.property_accessor'
+            - '@serializer.mapping.class_metadata_factory'
+            - '@serializer.name_converter.metadata_aware'
+
+    # Request body factories, resolved first-match by descending priority.
+    auto1.api.request.body_factory.stream:
+        class: Auto1\ServiceAPIClientBundle\Service\Request\BodyFactory\StreamRequestBodyFactory
+        tags:
+            - { name: auto1.api.request_body_factory, priority: 100 }
+
+    auto1.api.request.body_factory.multipart:
+        class: Auto1\ServiceAPIClientBundle\Service\Request\BodyFactory\MultipartRequestBodyFactory
+        arguments:
+            - '@auto1.api.request.multipart_stream_factory'
+        tags:
+            - { name: auto1.api.request_body_factory, priority: 50 }
+
+    auto1.api.request.body_factory.serializer:
+        class: Auto1\ServiceAPIClientBundle\Service\Request\BodyFactory\SerializerRequestBodyFactory
+        arguments:
+            - '@auto1.api.request.serializer'
+        tags:
+            - { name: auto1.api.request_body_factory, priority: -100 }
+
+    auto1.api.request.body_factory.registry:
+        class: Auto1\ServiceAPIClientBundle\Service\Request\BodyFactory\RequestBodyFactoryRegistry
+        arguments:
+            - !tagged_iterator auto1.api.request_body_factory
 
     auto1.api.request.visitor.header_propagation:
         class: Auto1\ServiceAPIClientBundle\Service\Request\Visitor\HeaderPropagationRequestVisitor
@@ -77,19 +123,19 @@ services:
         class: Auto1\ServiceAPIClientBundle\Service\Request\RequestFactory
         arguments:
             - '@auto1.api.endpoint.registry'
-            - '@auto1.api.request.serializer'
+            - '@auto1.api.request.body_factory.registry'
             - '@auto1.api.request.visitor.registry'
             - '@auto1.api.uri_factory'
             - '@auto1.api.request_factory'
             - '@auto1.api.stream_factory'
             - '%auto1_service_api_client.strict_mode%'
         calls:
-            - [setLogger, ['@logger']]
+            - [setLogger, ['@auto1.api.logger']]
 
     auto1.api.client_logger.psr:
         class: Auto1\ServiceAPIClientBundle\Service\ClientLogger\PsrClientLogger
         arguments:
-            - '@logger'
+            - '@auto1.api.logger'
             - '%auto1_service_api_client.request_time_log_level%'
         tags:
             - 'auto1.api.client_logger'
@@ -97,7 +143,7 @@ services:
     auto1.api.request_timer:
         class: Auto1\ServiceAPIClientBundle\Service\RequestTimer
         calls:
-            - [ setLogger, [ '@logger' ] ]
+            - [ setLogger, [ '@auto1.api.logger' ] ]
 
     auto1.api.client_logger.registry:
         class: Auto1\ServiceAPIClientBundle\Service\ClientLoggerRegistry
