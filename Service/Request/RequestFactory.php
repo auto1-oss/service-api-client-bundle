@@ -162,6 +162,9 @@ class RequestFactory implements RequestFactoryInterface, LoggerAwareInterface
                 throw new InvalidArgumentException($message, $errorCode);
             }
             $value = $serviceRequest->$getterMethod();
+            if ($value instanceof \DateTimeInterface) {
+                $value = $value->format($endpoint->getDateTimeFormat() ?: \DATE_ATOM);
+            }
             $value = array_key_exists($property, $queryParams) ? urlencode((string)$value) : $value;
             $path = str_replace($placeholder, $value, $path);
         }

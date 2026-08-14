@@ -554,4 +554,82 @@ class RequestFactoryTest extends TestCase
             $requestBuilder->create($this->serviceRequestProphecy->reveal())
         );
     }
+
+    /**
+     * @dataProvider dateTimeQueryParamProvider
+     *
+     * @return void
+     */
+    public function testDateTimeQueryParamIsFormatted(?string $dateTimeFormat, string $expectedUri): void
+    {
+        $baseUrl = 'baseUrl';
+        $routeString = '/rates?markup_date={markupDate}';
+        $requestMethod = 'GET';
+        $requestBody = '';
+
+        $endpointProphecy = $this->prophesize(EndpointInterface::class);
+        $endpointProphecy->getBaseUrl()->willReturn($baseUrl)->shouldBeCalled();
+        $endpointProphecy->getPath()->willReturn($routeString)->shouldBeCalled();
+        $endpointProphecy->getMethod()->willReturn($requestMethod)->shouldBeCalled();
+        $endpointProphecy->getRequestFormat()->willReturn(EndpointInterface::FORMAT_JSON)->shouldBeCalled();
+        $endpointProphecy->getDateTimeFormat()->willReturn($dateTimeFormat)->shouldBeCalled();
+        $endpoint = $endpointProphecy->reveal();
+
+        $uri = $this->prophesize(UriInterface::class)->reveal();
+        $requestProphecy = $this->prophesize(RequestInterface::class);
+        $request = $requestProphecy->reveal();
+        $stream = $this->prophesize(StreamInterface::class)->reveal();
+
+        $serviceRequest = $this->getMockBuilder(ServiceRequestInterface::class)
+            ->addMethods(['getMarkupDate'])
+            ->getMock();
+
+        $serviceRequest
+            ->expects($this->once())
+            ->method('getMarkupDate')
+            ->willReturn(new \DateTimeImmutable('2026-03-12T15:09:26+01:00'));
+
+        $this->endpointRegistryProphecy->getEndpoint($serviceRequest)->willReturn($endpoint)->shouldBeCalled();
+        $this->serializerProphecy
+            ->serialize($serviceRequest, EndpointInterface::FORMAT_JSON)
+            ->willReturn($requestBody)
+            ->shouldBeCalled()
+        ;
+        $this->uriFactoryProphecy->createUri($expectedUri)->willReturn($uri)->shouldBeCalled();
+        $this->requestFactoryProphecy->createRequest($requestMethod, $uri)->willReturn($request)->shouldBeCalled();
+        $this->streamFactoryProphecy->createStream($requestBody)->willReturn($stream)->shouldBeCalled();
+        $requestProphecy->withBody($stream)->willReturn($request)->shouldBeCalled();
+        $this->requestVisitorRegistryProphecy
+            ->getRegisteredRequestVisitors(EndpointInterface::FORMAT_JSON)
+            ->willReturn([])
+            ->shouldBeCalled()
+        ;
+        $this->requestDecoratorProphecy->visit($request)->shouldNotBeCalled();
+
+        $requestBuilder = new RequestFactory(
+            $this->endpointRegistryProphecy->reveal(),
+            $this->serializerProphecy->reveal(),
+            $this->requestVisitorRegistryProphecy->reveal(),
+            $this->uriFactoryProphecy->reveal(),
+            $this->requestFactoryProphecy->reveal(),
+            $this->streamFactoryProphecy->reveal(),
+            false
+        );
+
+        $this->assertInstanceOf(RequestInterface::class, $requestBuilder->create($serviceRequest));
+    }
+
+    /**
+     * @return array<string, array{0: string|null, 1: string}>
+     */
+    public function dateTimeQueryParamProvider(): array
+    {
+        return [
+            'endpoint format is used' => ['Y-m-d', 'baseUrl/rates?markup_date=2026-03-12'],
+            'falls back to ATOM when the endpoint declares none' => [
+                null,
+                'baseUrl/rates?markup_date=2026-03-12T15%3A09%3A26%2B01%3A00',
+            ],
+        ];
+    }
 }
